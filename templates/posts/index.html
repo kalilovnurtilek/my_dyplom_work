@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Это главная страница</h1>
+<ul>
+    {% for i in my_list %}
+        {% if i == 4 %}
+        <li>{{ i }}</li>
+        {% endif %}
+    {% endfor %}
+</ul>\
+
+<a href="{% url 'get-about' %}">Страница о нас</a>
+<a href="{% url 'get-contacts' %}"></a>
+          
+    
+{% endblock %}
