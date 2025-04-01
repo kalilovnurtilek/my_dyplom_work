@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Страница post_create</h1>  
+    
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Создать запись</button>
+    </form>
+
+
+
+ {% include "posts/includes/link_include.html" %}
+{% endblock %}
