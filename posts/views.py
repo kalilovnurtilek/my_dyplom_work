@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from posts.models import Post
 from django.urls import reverse_lazy
 from django.views import generic
+
+from posts.models import Post
+from posts.forms import CommentForm, PostForm
 
 def hello(request):
     body = "<h1>Hello</h1>"
@@ -58,16 +60,41 @@ class PostDetailView(generic.DetailView):
     context_object_name ='post'
     template_name= "posts/post_detail.html"
 
+    def post(self, request, pk):
+        # post_id = request.POST.get("post_id",None)
+        post= Post.objects.get(pk=pk)
+        form = CommentForm(request.POST)
+
+        # name=request.POST.get("name", None)
+        # text = request.POST.get('text', None)
+        # if name and text:
+        #     comment = Comment.objects.create(name=name,text=text,post=post)
+        #     comment.save()
+
+        if form.is_valid():
+            pre_saved_comment = form.save(commit=False)
+            pre_saved_comment.post=post
+            pre_saved_comment.save()
+
+            return redirect('post-detail', pk)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"]= CommentForm()
+        context["title"]="Просмотр поста" 
+        return context
+
 class PostCreateView(generic.CreateView):
     model = Post
     template_name = 'posts/post_create.html'
     fields=["title","content"]
     success_url = reverse_lazy("index-page")
+    form = PostForm
 
 class PostUpdateView(generic.UpdateView):
     model = Post
     template_name = 'posts/post_update.html'
-    fields=["title","content"]
+    form_class = PostForm
     success_url = reverse_lazy("index-page")
 
 
@@ -75,36 +102,10 @@ class PostDeleteView(generic.DeleteView):
     model = Post
     success_url= reverse_lazy("index-page")
 
-
-
+ 
 class AboutView(generic.TemplateView):
     template_name="posts/about.html"
     extra_context = {
         "title": "Страница о нас"
     }
     
-
-#def get_about(request):
-#     context = {
-#         "title": "Страница о нас"
-#     }
-#     return render(request, "posts/about.html", context = context)
-
-
-# def get_post(request):
-#     context = {
-#         "title":"Получить сообщение"
-#     }
-#     return render(request, "posts/post_create.html", context=context)
-
-# def update_post(request):
-#     context = {
-#         "title":"Изменить сообщение"
-#     }
-#     return render(request, "posts/post_update.html", context=context)
-
-# def delete_post(request):
-#     context = {
-#         "title":"Удалить пост"
-#     }
-#     return render(request, "posts/post_deletehtml", context=context)
