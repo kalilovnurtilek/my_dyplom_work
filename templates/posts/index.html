@@ -16,9 +16,14 @@
 <br>
 
 
-
+<ul>    
+  {% if user.is_authenticated %}
+    
+  <button type="button"><a href="{% url 'post-create' %}">Создать пост</a></button>
+  
+  {% endif %}
+</ul>
   
 
-<button type="button"><a href="{% url 'post-create' %}">Создать пост</a></button>
     
 {% endblock %}
