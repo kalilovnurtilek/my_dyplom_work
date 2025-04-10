@@ -2,9 +2,18 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views import generic
-
+from .forms import PDFPostForm
+from .models import PDFPost
+from django.contrib.auth.decorators import login_required
 from posts.models import Post
 from posts.forms import CommentForm, PostForm
+
+from django.http import FileResponse, HttpResponseForbidden
+from django.shortcuts import get_object_or_404
+from .models import PDFPost
+
+
+
 
 def hello(request):
     body = "<h1>Hello</h1>"
@@ -109,3 +118,32 @@ class AboutView(generic.TemplateView):
         "title": "Страница о нас"
     }
     
+
+
+@login_required
+def upload_pdf(request):
+    if request.method == 'POST':
+        form = PDFPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            pdf_post = form.save(commit=False)
+            pdf_post.owner = request.user
+            pdf_post.save()
+            form.save_m2m()  # Сохраняем ManyToMany
+            return redirect('index-page')  # Перенаправление на список
+    else:
+        form = PDFPostForm()
+    return render(request, 'posts/upload_pdf.html', {'form': form})
+
+@login_required
+def view_pdf(request, post_id):
+    post = get_object_or_404(PDFPost, id=post_id)
+
+    if request.user == post.owner or request.user in post.allowed_users.all():
+        return FileResponse(post.pdf_file.open(), content_type='application/pdf')
+    else:
+        return HttpResponseForbidden("У вас нет доступа к этому PDF.")
+    
+
+# def my_pdfs_view(request):
+#     # Ваша логика для обработки запроса
+#     return render(request, 'posts/my_pdfs.html')  # или другая логика

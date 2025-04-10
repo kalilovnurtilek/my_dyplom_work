@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class Post(models.Model):
     title = models.CharField( max_length=300,verbose_name="Заголовок")
@@ -29,3 +30,15 @@ class Comment(models.Model):
         ordering = ('-created',)
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
+
+
+
+class PDFPost(models.Model):
+    title = models.CharField(max_length=255)
+    pdf_file = models.FileField(upload_to='pdfs/')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_pdfs')
+    allowed_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='accessible_pdfs', blank=True)
+
+    def __str__(self):
+        return self.title
+    
