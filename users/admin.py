@@ -13,8 +13,17 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
     search_fields = ('email',)
     fieldsets = (
-        ( "Основная информация",{'fields':('email','password')}),
+        ("Основная информация",{'fields':('email','password')}),
         ("Права пользователя", {'fields':('is_staff','is_active','groups','user_permissions')}),
+    )
+
+    add_fieldsets = (
+        ("Создание пользователя",{
+            "classes":("wide"),
+            "fields":(
+                'email', 'password1', 'password2', 'is_staff', 'is_active', 'groups', 'user_permissions'
+            )
+        }),
     )
 
 admin.site.register(CustomUser, CustomUserAdmin)
