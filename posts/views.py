@@ -5,9 +5,9 @@ from django.views import generic
 from .forms import PDFPostForm
 from .models import PDFPost
 from django.contrib.auth.decorators import login_required
-from posts.models import Post
+from posts.models import Post, PDFPost
 from posts.forms import CommentForm, PostForm
-
+from django.db.models import Q
 from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from .models import PDFPost
@@ -60,9 +60,22 @@ def get_contacts(request):
 
 class IndexView(generic.ListView):
     queryset = Post.objects.filter(status=True)
-    context_object_name='posts'
-    # model =Post
-    template_name= "posts/index.html"
+    context_object_name = 'posts'
+    template_name = "posts/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Показываем только PDF-документы, к которым у пользователя есть доступ
+        user = self.request.user
+        if user.is_authenticated:
+            context['pdf_posts'] = PDFPost.objects.filter(
+                Q(owner=user) | Q(allowed_users=user)
+            ).distinct()
+        else:
+            context['pdf_posts'] = PDFPost.objects.none()
+
+        return context
 
 class PostDetailView(generic.DetailView):
     model =Post
