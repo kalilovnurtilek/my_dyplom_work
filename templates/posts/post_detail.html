@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<figure class="text-center">
-    <blockquote class="blockquote">
-        <h1 class="display-6"> {{ post }}</h1>
-    </blockquote>
-    <figcaption class="blockquote-footer">
-      {{ post.created }}
-    </figcaption>
-  </figure>
-  <p>{{post.content}}</p>
+<h2>{{ post.title }}</h2>
+<p>{{ post.content }}</p>
+
+{% if is_fully_approved %}
+    <p><strong>✅ Пост одобрен всеми</strong></p>
+{% elif is_user_turn %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">✅ Подтвердить</button>
+    </form>
+{% else %}
+    <p>Ожидается подтверждение другого пользователя...</p>
+{% endif %}
 
   {% for comment in post.post_comment.all|slice:":4" %}
   <br><div class="card">

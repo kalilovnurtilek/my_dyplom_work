@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "posts",
     "users",
     # libs
+    'widget_tweaks'
 ]
 
 MIDDLEWARE = [

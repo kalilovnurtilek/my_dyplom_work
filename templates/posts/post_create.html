@@ -1,14 +1,70 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Страница post_create</h1>  
-    
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Создать запись</button>
-    </form>
+{% load widget_tweaks %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <p style="color:red">{{ error }}</p>
+        {% endfor %}
+    {% endfor %}
+    <button type="submit">Создать запись</button>
+</form>
 
 
 
- {% include "posts/includes/link_include.html" %}
+ <!-- <h1>Создать пост</h1>
+
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="id_title" class="form-label">Заголовок</label>
+    {{ form.title|add_class:"form-control" }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_content" class="form-label">Содержание</label>
+    {{ form.content|add_class:"form-control" }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_pdf_file" class="form-label">Загрузить PDF</label>
+    {{ form.pdf_file|add_class:"form-control" }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_allowed_users" class="form-label">Пользователи, которые могут подтвердить пост</label>
+    <p class="text-muted">Выберите пользователей, которые должны подтвердить этот пост</p>
+    {{ form.allowed_users|add_class:"form-select" }}
+  </div>
+
+  <div class="mb-3 form-check">
+    {{ form.status }}
+    <label class="form-check-label" for="id_status">Опубликовать</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Создать запись</button>
+</form>
+
+{% if post.pk %}
+  <h4>Информация о доступе</h4>
+  <ul>
+    {% for user in post.allowed_users.all %}
+      <li>
+        {{ user.username }} 
+        {% if user.id in approved_users %}
+          ✅ Подтвердил
+        {% else %}
+          ⏳ Ожидает подтверждения
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %} -->
+
+
+
+{% include "posts/includes/link_include.html" %}
 {% endblock %}
