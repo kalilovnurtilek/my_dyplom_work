@@ -9,6 +9,19 @@ from django.db.models import Q
 from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.db import models    
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+
+
+
+
+# @staff_member_required  # Этот декоратор ограничивает доступ только для суперпользователей
+# def user_list(request):
+#     users = User.objects.all()  # Получаем всех пользователей
+#     return render(request, 'users/user_list.html', {'users': users})
+
+
+
 
 
 def hello(request):
