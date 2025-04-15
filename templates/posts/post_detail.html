@@ -46,6 +46,12 @@
 
 <br>
 {% if user.is_superuser %}
+<!-- <form action="{% url 'post-delete' post.id %}" method="get">
+{% csrf_token %}
+<button type="submit">Удалить пост</button>
+</form> -->
+<br>
+<br>
 <form action="{% url 'post-delete' post.id %}" method="get">
 {% csrf_token %}
 <button type="submit">Удалить пост</button>
@@ -53,7 +59,7 @@
 <br>
 
 <a href="{% url 'post-update' post.id %}">
-  <button type="submit">Обновить запись</button>
+  <button type="submit">Обновить запись</butpost
 </a>
 {% endif %}
 {% endblock %}

@@ -4,6 +4,8 @@ from posts.views import (
     PostCreateView, PostUpdateView, PostDeleteView, PostDetailView
 )
 
+
+
 urlpatterns = [
     path("hello/", hello, name="helo-view"),
     path("", IndexView.as_view(), name="index-page"),

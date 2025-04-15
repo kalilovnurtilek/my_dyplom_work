@@ -136,5 +136,4 @@ class AboutView(generic.TemplateView):
 
 class PostDeleteView(generic.DeleteView):
     model = Post
-    template_name = 'posts/post_confirm_delete.html'
-    success_url = reverse_lazy('posts:post_list')  # Ссылка на страницу, куда направит после успешного удаления
+    success_url= reverse_lazy("index-page")
