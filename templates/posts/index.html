@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if user.is_superuser %}
+<h1>Вы админ</h1>
+{% else %}
 <h1>Это главная страница</h1>
+{% endif %} 
 
 {% if pdf_posts %}
   <table class="table">

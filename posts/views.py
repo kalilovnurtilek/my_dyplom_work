@@ -11,25 +11,9 @@ from django.shortcuts import get_object_or_404
 from django.db import models    
 
 
-
-
 def hello(request):
     body = "<h1>Hello</h1>"
-    # body = """
-#     <!DOCTYPE html>
-# <html>
-#     <head>
-#         <title>Geek TEST</title>
-#     </head>
-# <body>
-
-#         <h1>Загаловок первого уровня</h1>
-#         <p>Параграф</p>
-
-# </body>
-# </html>
-#     """
-
+   
     headers = {"name": "Alex",}
             #    "Content-Type" :"application/vnd.ms-exel"}
     return HttpResponse(body, headers=headers, status=500)
@@ -37,15 +21,6 @@ def hello(request):
 
 
 
-
-
-# def get_index(request):
-#     posts = Post.objects.filter(status=True)
-#     context = {
-#         "title" : "Главная страница",
-#         "posts":posts,
-#     }
-#     return render(request, "posts/index.html", context=context)
 
 
 
@@ -64,12 +39,18 @@ class IndexView(generic.TemplateView):
 
         user = self.request.user
         if user.is_authenticated:
-            posts = Post.objects.filter(
-                status='published'
-            ).filter(
-                models.Q(owner=user) | models.Q(allowed_users=user)
-            ).distinct()
+            if user.is_superuser:
+                # Если это суперпользователь, показываем все опубликованные посты
+                posts = Post.objects.filter(status='published')
+            else:
+                # Для обычных пользователей показываем их посты или разрешённые
+                posts = Post.objects.filter(
+                    status='published'
+                ).filter(
+                    models.Q(owner=user) | models.Q(allowed_users=user)
+                ).distinct()
         else:
+            # Если пользователь не авторизован, не показываем посты
             posts = Post.objects.none()
 
         context['pdf_posts'] = posts
@@ -80,45 +61,7 @@ class IndexView(generic.TemplateView):
 
 
 
-
-
-# class PostDetailView(generic.DetailView):
-#     model =Post
-#     context_object_name ='post'
-#     template_name= "posts/post_detail.html"
-
-#     def post(self, request, pk):
-#         # post_id = request.POST.get("post_id",None)
-#         post= Post.objects.all()
-#         form = CommentForm(request.POST)
-
-#         # name=request.POST.get("name", None)
-#         # text = request.POST.get('text', None)
-#         # if name and text:
-#         #     comment = Comment.objects.create(name=name,text=text,post=post)
-#         #     comment.save()
-
-#         if form.is_valid():
-#             pre_saved_comment = form.save(commit=False)
-#             pre_saved_comment.post=post
-#             pre_saved_comment.save()
-
-#             return redirect('post-detail', pk)
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context["form"]= CommentForm()
-    #     context["title"]="Просмотр поста" 
-    #     return context
-
-# class PostCreateView(generic.CreateView):
-#     model = Post
-#     template_name = 'posts/post_create.html'
-#     fields = ['title', 'content', 'pdf_file', 'allowed_users', 'status']
-
-#     def get_success_url(self):
-#         return reverse_lazy('post_detail', kwargs={'pk': self.object.pk})
-
+#
 class PostCreateView(generic.CreateView):
     model = Post
     template_name = 'posts/post_create.html'
