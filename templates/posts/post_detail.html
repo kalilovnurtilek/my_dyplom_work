@@ -1,65 +1,86 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 {% block content %}
+<div class="container mt-4">
+  <h1>{{ post.title }}</h1>
+  <p><strong>Автор:</strong> {{ post.owner.get_full_name }}</p>
+  <p>{{ post.content }}</p>
 
-
-<p>{{ post.content }}</p>4
-
-<div class="card" style="width: 18rem;">
-  
-  <div class="card-body">
-    <h5 class="card-title"> {{ post.title }} </h5>
-    <h6 class="card-subtitle mb-2 text-body-secondary">{{ post.created }}</h6>
-    <p class="card-text">{{ post.content }}</p>
-  </div>
-  <ul class="list-group list-group-flush">
-    <p><a href="{{ post.pdf_file.url }}">Открыть PDF</a></p>
+  {% if post.pdf_file %}
+    <p><a href="{{ post.pdf_file.url }}" target="_blank">📎 Открыть PDF</a></p>
     <iframe src="{{ post.pdf_file.url }}" width="100%" height="400px">
       Ваш браузер не поддерживает отображение PDF.
-  </iframe>
-  </object>
+    </iframe>
+  {% endif %}
+
+  <p><strong>Статус:</strong> 
+    {% if post.status == 'draft' %} Черновик 
+    {% elif post.status == 'published' %} ✅ Опубликован 
+    {% endif %}
+  </p>
+
+  <hr>
+
+  <h4>Маршрут согласования:</h4>
+  <ul>
+    {% for step in approval_steps %}
+      <li>
+        {{ step.order }}. {{ step.user.get_full_name|default:step.user.email }} —
+        {% if step.is_approved == True %}
+          ✅ Согласовано ({{ step.reviewed_at|date:"d.m.Y H:i" }})
+        {% elif step.is_approved == False %}
+          ❌ Отклонено ({{ step.reviewed_at|date:"d.m.Y H:i" }})
+        {% else %}
+          ⏳ Ожидает
+        {% endif %}
+      </li>
+    {% endfor %}
   </ul>
+
+  {% if can_approve %}
+    <hr>
+    <h4>Вы должны согласовать этот пост:</h4>
+    <form method="post">
+      {% csrf_token %}
+      <button name="approve" class="btn btn-success">Согласовать</button>
+      <button name="reject" class="btn btn-danger">Отклонить</button>
+    </form>
+  {% endif %}
+
+  <hr>
+  <h4>Комментарии:</h4>
+  <ul>
+    {% for comment in comments %}
+      <li><strong>{{ comment.author }}</strong>: {{ comment.text }} <br>
+          <small>{{ comment.created|date:"d.m.Y H:i" }}</small>
+      </li>
+    {% empty %}
+      <li>Комментариев пока нет.</li>
+    {% endfor %}
+  </ul>
+
+  {% if user.is_authenticated %}
+    <hr>
+    <h4>Добавить комментарий:</h4>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+  {% else %}
+    <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
+  {% endif %}
+
+  {% if user.is_superuser %}
+    <hr>
+    <form action="{% url 'post-delete' post.id %}" method="get">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Удалить пост</button>
+    </form>
+    <br>
+    <a href="{% url 'post-update' post.id %}">
+      <button class="btn btn-secondary">Обновить запись</button>
+    </a>
+  {% endif %}
 </div>
-
-
-<h2>Комментарии</h2>
-<div class="comments">
-  {% for comment in comments %}
-    <div class="comment">
-      <p><strong>{{ comment.author }}</strong> ({{ comment.created }})</p>
-      <p>{{ comment.text }}</p>
-    </div>
-  {% empty %}
-    <p>Нет комментариев.</p>
-  {% endfor %}
-</div>
-
-{% if user.is_authenticated %}
-  <h3>Оставьте комментарий</h3>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Отправить</button>
-  </form>
-{% else %}
-  <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
-{% endif %}
-
-<br>
-{% if user.is_superuser %}
-<!-- <form action="{% url 'post-delete' post.id %}" method="get">
-{% csrf_token %}
-<button type="submit">Удалить пост</button>
-</form> -->
-<br>
-<br>
-<form action="{% url 'post-delete' post.id %}" method="get">
-{% csrf_token %}
-<button type="submit">Удалить пост</button>
-</form>
-<br>
-
-<a href="{% url 'post-update' post.id %}">
-  <button type="submit">Обновить запись</butpost
-</a>
-{% endif %}
 {% endblock %}

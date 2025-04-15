@@ -1,75 +1,42 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends "base.html" %}
 {% load widget_tweaks %}
-<form method="post" enctype="multipart/form-data">
+{% block content %}
+<div class="container mt-4">
+  <h1>Создать новый пост</h1>
+  
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
+    
     {{ form.as_p }}
-    {% for field in form %}
-        {% for error in field.errors %}
-            <p style="color:red">{{ error }}</p>
-        {% endfor %}
-    {% endfor %}
-    <button type="submit">Создать запись</button>
-</form>
 
+    <h4>Маршрут согласования:</h4>
+    
+    <!-- Список пользователей для согласования -->
+    <div id="approval-steps">
+      <div class="approval-step">
+        <label for="approvers">Выберите пользователя для согласования:</label>
+        <select name="approvers" class="form-control">
+          {% for user in users %}
+            <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
 
+    <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
 
+    <br><br>
+    <button type="submit" class="btn btn-primary">Создать запись</button>
+  </form>
 
+  {% include "posts/includes/link_include.html" %}
+</div>
 
+<script>
+  function addApprovalStep() {
+    const step = document.querySelector('.approval-step').cloneNode(true);
+    document.getElementById('approval-steps').appendChild(step);
+  }
+</script>
 
-
-
- <!-- <h1>Создать пост</h1>
-
-<form action="" method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-
-  <div class="mb-3">
-    <label for="id_title" class="form-label">Заголовок</label>
-    {{ form.title|add_class:"form-control" }}
-  </div>
-
-  <div class="mb-3">
-    <label for="id_content" class="form-label">Содержание</label>
-    {{ form.content|add_class:"form-control" }}
-  </div>
-
-  <div class="mb-3">
-    <label for="id_pdf_file" class="form-label">Загрузить PDF</label>
-    {{ form.pdf_file|add_class:"form-control" }}
-  </div>
-
-  <div class="mb-3">
-    <label for="id_allowed_users" class="form-label">Пользователи, которые могут подтвердить пост</label>
-    <p class="text-muted">Выберите пользователей, которые должны подтвердить этот пост</p>
-    {{ form.allowed_users|add_class:"form-select" }}
-  </div>
-
-  <div class="mb-3 form-check">
-    {{ form.status }}
-    <label class="form-check-label" for="id_status">Опубликовать</label>
-  </div>
-
-  <button type="submit" class="btn btn-primary">Создать запись</button>
-</form>
-
-{% if post.pk %}
-  <h4>Информация о доступе</h4>
-  <ul>
-    {% for user in post.allowed_users.all %}
-      <li>
-        {{ user.username }} 
-        {% if user.id in approved_users %}
-          ✅ Подтвердил
-        {% else %}
-          ⏳ Ожидает подтверждения
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %} -->
-
-
-
-{% include "posts/includes/link_include.html" %}
 {% endblock %}

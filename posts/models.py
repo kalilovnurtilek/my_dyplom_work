@@ -24,6 +24,24 @@ class Post(models.Model):
         verbose_name_plural = "Посты"
 
 
+class ApprovalStep(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='approval_steps')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
+    is_approved = models.BooleanField(null=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    comment = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['order']
+        unique_together = ('post', 'user')
+
+    def __str__(self):
+        return f"{self.user} — {self.post.title} — {self.order}"
+
+
+
+
 
 class Comment(models.Model):
     text = models.TextField()
