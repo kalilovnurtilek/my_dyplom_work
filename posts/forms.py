@@ -1,11 +1,11 @@
 from django import forms
-from posts.models import Comment, Post
+from posts.models import Post, Comment
 from users.models import CustomUser
 
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields =("name","text")
+        fields = ['text'] 
 
 
 
@@ -28,10 +28,3 @@ class PostForm(forms.ModelForm):
         print(cleaned_data)  # Выводим очищенные данные для отладки
         return cleaned_data
 
-# class PDFPostForm(forms.ModelForm):
-#     class Meta:
-#         model = PDFPost
-#         fields = ['title', 'pdf_file', 'allowed_users']
-#         widgets = {
-#             'allowed_users': forms.CheckboxSelectMultiple
-#         }
