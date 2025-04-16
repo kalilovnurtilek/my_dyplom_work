@@ -6,12 +6,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['text'] 
-
-
 class PostForm(forms.ModelForm):
     approval_users = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
@@ -24,12 +18,7 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ['title', 'content', 'status', 'pdf_file']
 
-    def save(self, commit=True):
-        # Сохраняем объект Post, но не сохраняем многие ко многим пока
-        post = super().save(commit=False)
-
-        if commit:
-            post.save()  # Сохраняем сам пост
-            self.save_m2m()  # Сохраняем связи ManyToMany (пользователи для согласования)
-        return post
-
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text'] 
