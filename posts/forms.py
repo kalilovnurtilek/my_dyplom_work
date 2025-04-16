@@ -1,6 +1,10 @@
 from django import forms
 from posts.models import Post, Comment
 from users.models import CustomUser
+from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -8,23 +12,24 @@ class CommentForm(forms.ModelForm):
         fields = ['text'] 
 
 
-
 class PostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['title', 'content', 'pdf_file', 'allowed_users', 'status']
-        widgets = {
-            'allowed_users': forms.CheckboxSelectMultiple
-        }
-
-    allowed_users = forms.ModelMultipleChoiceField(
-        queryset=CustomUser.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False,
+    approval_users = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.SelectMultiple(attrs={'size': 10}),
+        label="Маршрут согласования (в порядке сверху вниз)",
+        required=True
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        # Отладка: выводим очищенные данные для проверки
-        print(cleaned_data)
-        return cleaned_data
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'status', 'pdf_file']
+
+    def save(self, commit=True):
+        # Сохраняем объект Post, но не сохраняем многие ко многим пока
+        post = super().save(commit=False)
+
+        if commit:
+            post.save()  # Сохраняем сам пост
+            self.save_m2m()  # Сохраняем связи ManyToMany (пользователи для согласования)
+        return post
+

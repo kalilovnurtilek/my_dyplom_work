@@ -18,6 +18,24 @@
     {% elif post.status == 'published' %} ✅ Опубликован 
     {% endif %}
   </p>
+  
+  <p><strong>Статус согласования:</strong> 
+    {% if post.status_approval == 'not_started' %}
+      Ожидает начала
+    {% elif post.status_approval == 'in_progress' %}
+      В процессе согласования
+    {% elif post.status_approval == 'approved' %}
+      ✅ Одобрено
+    {% elif post.status_approval == 'rejected' %}
+      ❌ Отклонено
+    {% endif %}
+  </p>
+
+  {% if post.current_approver %}
+    <p><strong>Текущий согласующий:</strong> {{ post.current_approver.get_full_name }}</p>
+  {% else %}
+    <p><strong>Согласование завершено</strong></p>
+  {% endif %}
 
   <hr>
 
@@ -25,7 +43,7 @@
   <ul>
     {% for step in approval_steps %}
       <li>
-        {{ step.order }}. {{ step.user.get_full_name|default:step.user.email }} —
+        {{ step.order }}. {{ step.user.get_full_name|default:step.user.email }} — 
         {% if step.is_approved == True %}
           ✅ Согласовано ({{ step.reviewed_at|date:"d.m.Y H:i" }})
         {% elif step.is_approved == False %}

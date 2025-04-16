@@ -3,19 +3,38 @@
 {% block content %}
 <div class="container mt-4">
   <h1>Создать новый пост</h1>
-  
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    
-    {{ form.as_p }}
 
-    <h4>Маршрут согласования:</h4>
-    
-    <!-- Список пользователей для согласования -->
+    <!-- Стандартная форма -->
+    <div class="mb-3">
+      {{ form.title.label_tag }}
+      {{ form.title|add_class:"form-control" }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.content.label_tag }}
+      {{ form.content|add_class:"form-control" }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.status.label_tag }}
+      {{ form.status|add_class:"form-select" }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.pdf_file.label_tag }}
+      {{ form.pdf_file|add_class:"form-control" }}
+    </div>
+
+    <!-- Маршрут согласования -->
+    <h4 class="mt-4">Маршрут согласования:</h4>
+
     <div id="approval-steps">
-      <div class="approval-step">
+      <div class="approval-step mb-2">
         <label for="approvers">Выберите пользователя для согласования:</label>
-        <select name="approvers" class="form-control">
+        <select name="approvers[]" class="form-control">
           {% for user in users %}
             <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
           {% endfor %}
@@ -37,6 +56,14 @@
     const step = document.querySelector('.approval-step').cloneNode(true);
     document.getElementById('approval-steps').appendChild(step);
   }
+
+  // Обеспечим корректную передачу данных при сабмите
+  document.querySelector('form').addEventListener('submit', function() {
+    const selects = document.querySelectorAll('select[name="approvers[]"]');
+    selects.forEach(select => {
+      select.name = 'approvers[]';  // Убедимся, что данные отправляются как массив
+    });
+  });
 </script>
 
 {% endblock %}

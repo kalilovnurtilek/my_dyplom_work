@@ -13,6 +13,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -74,35 +77,50 @@ class IndexView(generic.TemplateView):
 
 
 
-User = get_user_model()
+
+
+logger = logging.getLogger(__name__)
 
 class PostCreateView(generic.CreateView):
     model = Post
-    template_name = 'posts/post_create.html'
     form_class = PostForm
-    success_url = reverse_lazy("index-page")
+    template_name = 'posts/post_create.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['users'] = get_user_model().objects.all()  # Передаем список пользователей в контекст
+        return context
 
     def form_valid(self, form):
-        # Сохраняем сам пост
-        form.instance.owner = self.request.user
-        post = form.save()
-
-        # Получаем список пользователей для согласования
-        approvers = self.request.POST.getlist('allowed_users')
-
-        # Создаем шаги согласования для каждого пользователя
-        for index, user_id in enumerate(approvers):
-            user = User.objects.get(id=user_id)
-            ApprovalStep.objects.create(
-                post=post,
-                user=user,
-                order=index + 1  # Порядок этапа
-            )
-
-        return super().form_valid(form)
-
-
+        logger.debug("Form is valid, preparing to save post...")
     
+        if not form.is_valid():
+            logger.error(f"Form is not valid: {form.errors}")
+            return super().form_invalid(form)  # Отправляем обратно, если форма не валидна
+
+        post = form.save(commit=False)
+        post.owner = self.request.user
+        logger.debug(f"Saving post with title: {post.title}")
+        post.save()
+
+        approval_users = form.cleaned_data['approval_users']
+        logger.debug(f"Approval users: {approval_users}")
+
+        for i, user in enumerate(approval_users):
+            ApprovalStep.objects.create(post=post, user=user, order=i+1)
+            logger.debug(f"Created approval step for {user.get_full_name()} with order {i+1}")
+
+    # Проверяем редирект
+        try:
+            response = redirect('post-detail', pk=post.pk)
+            logger.debug(f"Redirecting to: {response.url}")
+            return response
+        except Exception as e:
+            logger.error(f"Error during redirect: {e}")
+            return super().form_invalid(form)
+
+
+
 class PostUpdateView(generic.UpdateView):
     model = Post
     template_name = 'posts/post_update.html'
