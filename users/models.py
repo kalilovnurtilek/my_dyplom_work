@@ -18,7 +18,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+        verbose_name_plural = "Пользователи" 
 
     def __str__(self):
-        return self.email 
+        return self.email
+
+    def get_full_name(self):
+        """Возвращает полное имя пользователя."""
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return full_name or self.email  # если имя и фамилия пустые, вернем email

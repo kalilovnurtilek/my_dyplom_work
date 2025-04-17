@@ -2,74 +2,50 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container mt-4">
-  <h1>Создать новый пост</h1>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
- 
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    <!-- Стандартная форма -->
-    <div class="mb-3">
-      {{ form.title.label_tag }}
-      {{ form.title|add_class:"form-control" }}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="{{ form.title.id_for_label }}">Заголовок</label>
+    {{ form.title }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.content.id_for_label }}">Содержимое</label>
+    {{ form.content }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.status.id_for_label }}">Статус</label>
+    {{ form.status }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.pdf_file.id_for_label }}">PDF-файл</label>
+    {{ form.pdf_file }}
+  </div>
+
+  <h4 class="mt-4">Маршрут согласования:</h4>
+  <div id="approval-steps">
+    <div class="approval-step mb-2">
+      <label>Выберите пользователя:</label>
+      <select name="approvers[]" class="form-control">
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
+        {% endfor %}
+      </select>
     </div>
+  </div>
 
-    <div class="mb-3">
-      {{ form.content.label_tag }}
-      {{ form.content|add_class:"form-control" }}
-    </div>
-
-    <div class="mb-3">
-      {{ form.status.label_tag }}
-      {{ form.status|add_class:"form-select" }}
-    </div>
-
-    <div class="mb-3">
-      {{ form.pdf_file.label_tag }}
-      {{ form.pdf_file|add_class:"form-control" }}
-    </div>
-
-    <!-- Маршрут согласования -->
-    <h4 class="mt-4">Маршрут согласования:</h4>
-
-    <div id="approval-steps">
-      <div class="approval-step mb-2">
-        <label for="approvers">Выберите пользователя для согласования:</label>
-        <select name="approvers[]" class="form-control">
-          {% for user in users %}
-            <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-
-    <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
-
-    <br><br>
-       <!-- Все поля формы -->
-       <button type="submit" class="btn btn-primary">Создать запись</button>
-      </form>
-    <button type="submit" class="btn btn-primary">Создать запись</button>
-  </form>
-
-  {% include "posts/includes/link_include.html" %}
-</div>
+  <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
+  <br><br>
+  <button type="submit" class="btn btn-primary">Создать запись</button>
+</form>
 
 <script>
   function addApprovalStep() {
     const step = document.querySelector('.approval-step').cloneNode(true);
+    step.querySelector('select').value = "";
     document.getElementById('approval-steps').appendChild(step);
   }
-
-  // Обеспечим корректную передачу данных при сабмите
-  document.querySelector('form').addEventListener('submit', function() {
-    const selects = document.querySelectorAll('select[name="approvers"]');
-    selects.forEach(select => {
-      select.name = 'approvers[]';  // Убедимся, что данные отправляются как массив
-    });
-  });
 </script>
-
 {% endblock %}

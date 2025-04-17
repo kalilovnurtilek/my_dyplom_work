@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="get">
+    <input type="text" name="q" placeholder="Поиск по названию..." value="{{ request.GET.q }}">
+    <button type="submit">Поиск</button>
+  </form>
+
+
+  <ul>
+    {% for post in posts %}
+      <li>
+        <a href="{% url 'post-detail' post.pk %}">
+          {{ post.title }} — {{ post.status }}
+        </a>
+      </li>
+    {% empty %}
+      <li>Ничего не найдено.</li>
+    {% endfor %}
+  </ul>
+  
+
+
+
+{% endblock %}

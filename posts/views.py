@@ -1,85 +1,36 @@
+# views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from posts.models import Post, ApprovalStep
-from posts.forms import  PostForm, CommentForm
-from django.db.models import Q
-from django.http import FileResponse, HttpResponseForbidden
-from django.shortcuts import get_object_or_404
-from django.db import models    
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.models import User
-from django.utils import timezone
+from posts.forms import PostForm, CommentForm
 from django.contrib.auth import get_user_model
-import logging
-
-logger = logging.getLogger(__name__)
-
-
-
-
-# @staff_member_required  # Этот декоратор ограничивает доступ только для суперпользователей
-# def user_list(request):
-#     users = User.objects.all()  # Получаем всех пользователей
-#     return render(request, 'users/user_list.html', {'users': users})
+from django.utils import timezone
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import ListView
 
 
 
 
 
-def hello(request):
-    body = "<h1>Hello</h1>"
-   
-    headers = {"name": "Alex",}
-            #    "Content-Type" :"application/vnd.ms-exel"}
-    return HttpResponse(body, headers=headers, status=500)
+class SuperuserPostListView(UserPassesTestMixin, ListView):
+    model = Post
+    template_name = 'posts/superuser_post_list.html'
+    context_object_name = 'posts'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def get_queryset(self):
+        queryset = Post.objects.all()
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(title__icontains=query)
+        return queryset
 
 
-
-
-
-
-
-def get_contacts(request):
-    context = {
-        "title": "Страница контакты"
-    }
-    return render(request, "posts/contact.html", context=context)
-
-
-class IndexView(generic.TemplateView):
-    template_name = 'posts/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        user = self.request.user
-        if user.is_authenticated:
-            if user.is_superuser:
-                # Если это суперпользователь, показываем все опубликованные посты
-                posts = Post.objects.filter(status='published')
-            else:
-                # Для обычных пользователей показываем их посты или разрешённые
-                posts = Post.objects.filter(
-                    status='published'
-                ).filter(
-                    models.Q(owner=user) | models.Q(allowed_users=user)
-                ).distinct()
-        else:
-            # Если пользователь не авторизован, не показываем посты
-            posts = Post.objects.none()
-
-        context['pdf_posts'] = posts
-        return context
-
-
-
-
-
-
-logger = logging.getLogger(__name__)
 
 class PostCreateView(generic.CreateView):
     model = Post
@@ -88,49 +39,20 @@ class PostCreateView(generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = get_user_model().objects.all()  # Передаем список пользователей в контекст
+        context['users'] = get_user_model().objects.all()
         return context
 
     def form_valid(self, form):
-        logger.debug("Form is valid, preparing to save post...")
-    
-        if not form.is_valid():
-            logger.error(f"Form is not valid: {form.errors}")
-            return super().form_invalid(form)  # Отправляем обратно, если форма не валидна
-
         post = form.save(commit=False)
         post.owner = self.request.user
-        logger.debug(f"Saving post with title: {post.title}")
         post.save()
 
-        approval_users = form.cleaned_data['approval_users']
-        logger.debug(f"Approval users: {approval_users}")
-
-        for i, user in enumerate(approval_users):
+        approver_ids = self.request.POST.getlist('approvers[]')
+        for i, uid in enumerate(approver_ids):
+            user = get_user_model().objects.get(pk=uid)
             ApprovalStep.objects.create(post=post, user=user, order=i+1)
-            logger.debug(f"Created approval step for {user.get_full_name()} with order {i+1}")
 
-    # Проверяем редирект
-        try:
-            response = redirect('post-detail', pk=post.pk)
-            logger.debug(f"Redirecting to: {response.url}")
-            return response
-        except Exception as e:
-            logger.error(f"Error during redirect: {e}")
-            return super().form_invalid(form)
-
-
-
-class PostUpdateView(generic.UpdateView):
-    model = Post
-    template_name = 'posts/post_update.html'
-    form_class = PostForm
-    success_url = reverse_lazy("index-page")
-
-
-
-
-
+        return redirect('index-page')
 
 
 class PostDetailView(generic.DetailView):
@@ -155,43 +77,70 @@ class PostDetailView(generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         post = self.get_object()
+        action = request.POST.get("action")
 
-        if 'approve' in request.POST or 'reject' in request.POST:
-            current_step = post.approval_steps.filter(is_approved=None).order_by('order').first()
-
+        if action == "approval":
+            current_step = post.approval_steps.filter(is_approved=None).order_by("order").first()
             if current_step and current_step.user == request.user:
-                current_step.is_approved = 'approve' in request.POST
+                current_step.is_approved = "approve" in request.POST
                 current_step.reviewed_at = timezone.now()
                 current_step.save()
 
                 if not current_step.is_approved:
-                    post.status = 'draft'
+                    post.status = "draft"
                     post.save()
                 elif not post.approval_steps.filter(is_approved=None).exists():
-                    post.status = 'published'
+                    post.status = "published"
                     post.save()
+            return redirect("post-detail", pk=post.pk)
 
-            return redirect('post-detail', pk=post.pk)
+        elif action == "comment":
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.author = request.user.get_full_name() or request.user.email
+                comment.save()
+            return redirect("post-detail", pk=post.pk)
 
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-
-            if request.user.is_authenticated:
-                full_name = f"{request.user.first_name} {request.user.last_name}".strip()
-                comment.author = full_name if full_name else request.user.email
-            else:
-                comment.author = "Аноним"
-
-            comment.save()
-
-        return redirect('post-detail', pk=post.pk)
-        
- 
+        return redirect("post-detail", pk=post.pk)
 
 
 
+
+
+
+
+
+class IndexView(generic.TemplateView):
+    template_name = 'posts/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        if user.is_authenticated:
+            context['my_posts'] = Post.objects.filter(owner=user)
+
+        # Посты, которые ещё нужно согласовать
+            context['approval_posts'] = Post.objects.filter(
+            approval_steps__user=user,
+                approval_steps__is_approved=None
+            ).distinct()
+
+        # Посты, которые пользователь уже согласовал
+            context['approved_posts'] = Post.objects.filter(
+                approval_steps__user=user,
+                approval_steps__is_approved=True
+            ).distinct()
+
+        return context
+
+class PostUpdateView(generic.UpdateView):
+    model = Post
+    template_name = 'posts/post_update.html'
+    form_class = PostForm
+    success_url = reverse_lazy("index-page")
 
 class AboutView(generic.TemplateView):
     template_name="posts/about.html"
