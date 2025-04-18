@@ -10,6 +10,9 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
+# from .utils.pdf_generator import generate_post_pdf  # добавили
+
+
 
 
 

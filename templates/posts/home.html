@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<hr>
+
+<h2>📥 Посты, где вы участвуете в согласовании</h2>
+{% if approval_related_posts %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>№</th>
+        <th>Заголовок</th>
+        <th>Автор</th>
+        <th>Дата</th>
+        <th>Статус согласования</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for post in approval_related_posts %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
+          <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
+          <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+          <td>
+            {% with step=post.approval_steps.get(user=request.user) %}
+              {% if step.is_approved == None %}
+                🕓 Ожидается ваше согласование
+              {% elif step.is_approved %}
+                ✅ Вы уже согласовали
+              {% else %}
+                ❌ Вы отклонили
+              {% endif %}
+            {% endwith %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Вы пока не участвуете в согласовании постов.</p>
+{% endif %}
+
+{% endblock %}

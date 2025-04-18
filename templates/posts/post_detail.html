@@ -74,6 +74,18 @@
       <li>Комментариев пока нет.</li>
     {% endfor %}
   </ul>
+  
+  {% if user.is_superuser %}
+  <br>
+<form action="{% url 'post-delete' post.id %}" method="get">
+{% csrf_token %}
+<button type="submit">Удалить пост</button>
+</form>
+<br>
+<a href="{% url 'post-update' post.id %}">
+  <button type="submit">Обновить запись</button>
+<br>
+{% endif %}
 
   {% if user.is_authenticated %}
     <hr>
