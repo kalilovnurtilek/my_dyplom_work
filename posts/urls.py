@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import IndexView,  AboutView ,PostCreateView, PostUpdateView, PostDeleteView, PostDetailView,SuperuserPostListView
+from .views import IndexView,  AboutView ,PostCreateView, PostUpdateView, PostDeleteView, PostDetailView,SuperuserPostListView, CreateSpeciltyView
 
 
 
@@ -12,5 +12,6 @@ urlpatterns = [
     path("post/delete/<int:pk>/", PostDeleteView.as_view(), name="post-delete"),
     path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
     path('admin-posts/', SuperuserPostListView.as_view(), name='admin-posts'),
+    path('create-specialty/', CreateSpeciltyView.as_view(), name="create-special"),
     
 ]

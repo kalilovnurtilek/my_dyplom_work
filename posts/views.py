@@ -4,8 +4,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
-from posts.models import Post, ApprovalStep
-from posts.forms import PostForm, CommentForm
+from posts.models import Post, ApprovalStep, Specialty
+from posts.forms import PostForm, CommentForm, SpecialtyForm
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -49,14 +49,15 @@ class PostCreateView(generic.CreateView):
         post = form.save(commit=False)
         post.owner = self.request.user
         post.save()
+        form.save_m2m()  # сохранит specialty
 
+        # Создаём этапы согласования
         approver_ids = self.request.POST.getlist('approvers[]')
         for i, uid in enumerate(approver_ids):
             user = get_user_model().objects.get(pk=uid)
             ApprovalStep.objects.create(post=post, user=user, order=i+1)
 
         return redirect('index-page')
-
 
 class PostDetailView(generic.DetailView):
     model = Post
@@ -111,8 +112,21 @@ class PostDetailView(generic.DetailView):
 
 
 
+class CreateSpeciltyView(generic.CreateView):
+    model = Specialty
+    template_name = 'posts/specialty_create.html'
+    fields=["name","code"]
+    success_url = reverse_lazy("index-page")
+    form = SpecialtyForm   
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get("q")
+        specialties = Specialty.objects.all()
+        if query:
+            specialties = specialties.filter(name__icontains=query)
+        context["specialties"] = specialties
+        return context
 
 
 class IndexView(generic.TemplateView):

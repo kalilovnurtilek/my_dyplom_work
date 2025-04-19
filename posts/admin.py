@@ -1,10 +1,14 @@
 from django.contrib import admin
-from posts.models import Post
+from posts.models import Post , Specialty
 
 # простой способ регистрации модели в админке
 # admin.site.register(Post)
 
-
+@admin.register(Specialty)
+class SpecialtyAdmin(admin.ModelAdmin):
+    list_display = ['name','code']
+    list_filter = ['name']
+    
 
 
 @admin.register(Post)

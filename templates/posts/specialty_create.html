@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Можно добавить специальность</h1>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Добавить </button>
+    </form>
+
+
+
+    <h4>Существующие специальности</h4>
+    <form method="get">
+      <input type="text" name="q" placeholder="Поиск..." value="{{ request.GET.q }}">
+      <button type="submit">Искать</button>
+    </form>
+    
+    <ul>
+      {% for specialty in specialties %}
+        <li>{{ specialty.name }} ({{ specialty.code }})</li>
+      {% empty %}
+        <li>Ничего не найдено.</li>
+      {% endfor %}
+    </ul>
+
+{% endblock %}

@@ -4,6 +4,7 @@
 {% block content %}
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
+
   <div class="mb-3">
     <label for="{{ form.title.id_for_label }}">Заголовок</label>
     {{ form.title }}
@@ -20,8 +21,16 @@
   </div>
 
   <div class="mb-3">
-    <label for="{{ form.pdf_file.id_for_label }}">PDF-файл</label>
-    {{ form.pdf_file }}
+    <label for="{{ form.application_file.id_for_label }}">Заявление студента (PDF/скан)</label>
+    {{ form.application_file }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.specialty.id_for_label }}">Приоритетная специальность</label>
+    {{ form.specialty }}
+    {% if form.specialty.errors %}
+      <div class="text-danger">{{ form.specialty.errors }}</div>
+    {% endif %}
   </div>
 
   <h4 class="mt-4">Маршрут согласования:</h4>

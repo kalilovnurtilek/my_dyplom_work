@@ -3,13 +3,51 @@
 from django.db import models
 from django.conf import settings
 
+from django.db import models
+from django.conf import settings
+
+class Specialty(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return f"{self.code} – {self.name}"
+
 class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=[('draft', 'Черновик'), ('published', 'Опубликован')], default='draft')
-    pdf_file = models.FileField(upload_to='pdfs/', null=True, blank=True)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=[('draft', 'Черновик'), ('published', 'Опубликован')],
+        default='draft'
+    )
+    # Убираем поле pdf_file из формы, но оставляем для генерации протокола
+    pdf_file = models.FileField(
+        upload_to='pdfs/',
+        null=True,
+        blank=True,
+        verbose_name='Сгенерированный протокол (PDF)'
+    )
+    application_file = models.FileField(
+        upload_to='applications/',
+        null=True,
+        blank=True,
+        verbose_name='Заявление студента (PDF/скан)'
+    )
     created = models.DateTimeField(auto_now_add=True)
+
+    # Только одна приоритетная специальность
+    specialty = models.ForeignKey(
+        Specialty,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Приоритетная специальность'
+    )
 
     def __str__(self):
         return self.title
@@ -52,3 +90,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+

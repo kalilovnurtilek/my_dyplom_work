@@ -77,14 +77,14 @@
   
   {% if user.is_superuser %}
   <br>
-<form action="{% url 'post-delete' post.id %}" method="get">
-{% csrf_token %}
-<button type="submit">Удалить пост</button>
-</form>
-<br>
-<a href="{% url 'post-update' post.id %}">
-  <button type="submit">Обновить запись</button>
-<br>
+  <form action="{% url 'post-delete' post.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить пост</button>
+  </form>
+
+  <br>
+  <a href="{% url 'post-update' post.id %}" class="btn btn-secondary">Обновить запись</a>
+  <br>
 {% endif %}
 
   {% if user.is_authenticated %}
