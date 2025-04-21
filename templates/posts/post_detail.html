@@ -4,13 +4,23 @@
 <div class="container mt-4">
   <h1>{{ post.title }}</h1>
   <p><strong>Автор:</strong> {{ post.owner.get_full_name }}</p>
-  <p>{{ post.specialty }} -адистигине</p>
   <p>{{ post.content }}</p>
 
-  {% if post.pdf_file %}
-    <p><a href="{{ post.pdf_file.url }}" target="_blank">📎 Открыть PDF</a></p>
-  {% endif %}
 
+
+
+  {% if post.pdf_file %}
+  <h5>Просмотр PDF:</h5>
+    <a href="{{ post.pdf_file.url }}" target="_blank">Скачать PDF</a>
+{% else %}
+  <p class="text-danger">⚠️ PDF не найден</p>
+{% endif %}
+
+
+
+
+
+  
   <p><strong>Статус:</strong> 
     {% if post.status == 'draft' %} Черновик 
     {% elif post.status == 'published' %} ✅ Опубликован 
@@ -78,7 +88,7 @@
   
   {% if user.is_superuser %}
   <br>
-  <form action="{% url 'post-delete' post.id %}" method="get">
+  <form action="{% url 'post-delete' post.id %}" method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Удалить пост</button>
   </form>

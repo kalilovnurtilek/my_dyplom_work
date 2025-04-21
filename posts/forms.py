@@ -7,8 +7,9 @@ class PostForm(forms.ModelForm):
         fields = [
             'title',
             'content',
-            'application_file',  # поле для загрузки заявления
-            'specialty',         # единичный выбор специальности
+            'status',
+            'specialty',
+            'pdf_file',  # исправили на pdf_file
         ]
         widgets = {
             'specialty': forms.Select(),

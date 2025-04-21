@@ -27,13 +27,7 @@ class Post(models.Model):
     )
     # Убираем поле pdf_file из формы, но оставляем для генерации протокола
     pdf_file = models.FileField(
-        upload_to='pdfs/',
-        null=True,
-        blank=True,
-        verbose_name='Сгенерированный протокол (PDF)'
-    )
-    application_file = models.FileField(
-        upload_to='applications/',
+        upload_to='pdfs/',  # файлы сохраняются в папке media/pdfs/
         null=True,
         blank=True,
         verbose_name='Заявление студента (PDF/скан)'
