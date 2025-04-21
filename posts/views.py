@@ -116,7 +116,7 @@ class CreateSpeciltyView(generic.CreateView):
     model = Specialty
     template_name = 'posts/specialty_create.html'
     fields=["name","code"]
-    success_url = reverse_lazy("index-page")
+    success_url = reverse_lazy("create-special")
     form = SpecialtyForm   
 
     def get_context_data(self, **kwargs):

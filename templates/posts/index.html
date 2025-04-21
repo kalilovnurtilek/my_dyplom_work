@@ -17,7 +17,7 @@
         <br>
         <button><a href="{% url 'admin-posts' %}">Список постов</a></button>
         <br>
-        <button><a href="{% url 'create-special' %}">добавить специальность</a></button>
+        <button><a href="{% url 'create-special' %}">Добавить специальность</a></button>
       {% endif %}
     </div>
 
@@ -32,6 +32,7 @@
             <th>Заголовок</th>
             <th>Дата</th>
             <th>Статус</th>
+            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
           </tr>
         </thead>
         <tbody>
@@ -41,6 +42,17 @@
               <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
               <td>{{ post.created|date:"d.m.Y H:i" }}</td>
               <td>{{ post.status }}</td>
+              <td>
+                {% if post.status_approval == 'not_started' %}
+                  Ожидает начала
+                {% elif post.status_approval == 'in_progress' %}
+                  В процессе согласования
+                {% elif post.status_approval == 'approved' %}
+                  ✅ Одобрено
+                {% elif post.status_approval == 'rejected' %}
+                  ❌ Отклонено
+                {% endif %}
+              </td>
             </tr>
           {% endfor %}
         </tbody>
@@ -60,6 +72,7 @@
             <th>Заголовок</th>
             <th>Автор</th>
             <th>Дата</th>
+            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
           </tr>
         </thead>
         <tbody>
@@ -69,6 +82,17 @@
               <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
               <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
               <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if post.status_approval == 'not_started' %}
+                  Ожидает начала
+                {% elif post.status_approval == 'in_progress' %}
+                  В процессе согласования
+                {% elif post.status_approval == 'approved' %}
+                  ✅ Одобрено
+                {% elif post.status_approval == 'rejected' %}
+                  ❌ Отклонено
+                {% endif %}
+              </td>
             </tr>
           {% endfor %}
         </tbody>
@@ -88,6 +112,7 @@
             <th>Заголовок</th>
             <th>Автор</th>
             <th>Дата</th>
+            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
           </tr>
         </thead>
         <tbody>
@@ -97,6 +122,17 @@
               <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
               <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
               <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if post.status_approval == 'not_started' %}
+                  Ожидает начала
+                {% elif post.status_approval == 'in_progress' %}
+                  В процессе согласования
+                {% elif post.status_approval == 'approved' %}
+                  ✅ Одобрено
+                {% elif post.status_approval == 'rejected' %}
+                  ❌ Отклонено
+                {% endif %}
+              </td>
             </tr>
           {% endfor %}
         </tbody>

@@ -7,7 +7,6 @@ class PostForm(forms.ModelForm):
         fields = [
             'title',
             'content',
-            'status',
             'application_file',  # поле для загрузки заявления
             'specialty',         # единичный выбор специальности
         ]
