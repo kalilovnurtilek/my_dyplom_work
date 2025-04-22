@@ -6,6 +6,18 @@ from django.conf import settings
 from django.db import models
 from django.conf import settings
 
+
+
+# class Subject(models.Model):
+#     name = models.CharField(max_length=255)
+
+#     def __str__(self):
+#         return self.name
+# class StudentSubjectRecord(models.Model):
+#     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+#     credits = models.DecimalField(max_digits=4, decimal_places=1)
+#     is_passed = models.BooleanField(default=False)  # или можно указать тип: пройденный / недостающий
+
 class Specialty(models.Model):
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=20)
