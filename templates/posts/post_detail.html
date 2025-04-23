@@ -1,61 +1,123 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
+<div class="container mt-4">
+  <h1>{{ post.title }}</h1>
+  <p><strong>Автор:</strong> {{ post.owner.get_full_name }}</p>
+  <p>{{ post.content }}</p>
 
-<figure class="text-center">
-    <blockquote class="blockquote">
-        <h1 class="display-6"> {{ post }}</h1>
-    </blockquote>
-    <figcaption class="blockquote-footer">
-      {{ post.created }}
-    </figcaption>
-  </figure>
-  <p>{{post.content}}</p>
+  {% if post.pdf_file %}
+    <h3>Загруженный PDF:</h3>
+    <a href="{{ post.pdf_file.url }}" target="_blank">Скачать PDF</a>
+  {% endif %}
 
-  {% for comment in post.post_comment.all|slice:":4" %}
-  <br><div class="card">
-    <div class="card-header">
-      {{ comment.created }}
-    </div>
-    <div class="card-body">
-      <h5 class="card-title">{{ comment.name }}</h5>
-      <p class="card-text">{{ comment.text }}</p>
-    </div>
-  </div><br>
-  {% endfor %}
+  <p><strong>Статус:</strong> 
+    {% if post.status == 'draft' %} Черновик 
+    {% elif post.status == 'published' %} ✅ Опубликован 
+    {% endif %}
+  </p>
+  
+  <p><strong>Статус согласования:</strong> 
+    {% if post.status_approval == 'not_started' %} Ожидает начала
+    {% elif post.status_approval == 'in_progress' %} В процессе согласования
+    {% elif post.status_approval == 'approved' %} ✅ Одобрено
+    {% elif post.status_approval == 'rejected' %} ❌ Отклонено
+    {% endif %}
+  </p>
 
- <form action="" method="post">
-  {% csrf_token %}
-  <!-- <input type="hidden" value="{{ post.id }}" name="post.id">
-  <div class="mb-3 row">
-    <label for="inputName" class="col-sm-2 col-form-label">Имя пользователя</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="inputName" name="name">
-    </div>
-  </div>
+  {% if post.current_approver %}
+    <p><strong>Текущий согласующий:</strong> {{ post.current_approver.get_full_name }}</p>
+  {% else %}
+    <p><strong>Согласование завершено</strong></p>
+  {% endif %}
 
-  <div class="mb-3 row">
-    <label for="inputText" class="col-sm-2 col-form-label">Текст комментария</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="inputText" name="text">
-    </div>
-  </div> -->
+  <hr>
 
-  {{ form.as_p }}
-  <div class="col-auto">
-    <button type="submit" class="btn btn-primary mb-3">Оставить комментарий</button>
-  </div>
+  <h4>Маршрут согласования:</h4>
+  <ul>
+    {% for step in approval_steps %}
+      <li>
+        {{ step.order }}. {{ step.user.get_full_name|default:step.user.email }} — 
+        {% if step.is_approved == True %}
+          ✅ Согласовано ({{ step.reviewed_at|date:"d.m.Y H:i" }})
+        {% elif step.is_approved == False %}
+          ❌ Отклонено ({{ step.reviewed_at|date:"d.m.Y H:i" }})
+        {% else %}
+          ⏳ Ожидает
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
 
-</form>
+  {% if can_approve %}
+    <hr>
+    <h4>Вы должны согласовать этот пост:</h4>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="approval">
+      <button type="submit" name="approve" class="btn btn-success">Согласовать</button>
+      <button type="submit" name="reject" class="btn btn-danger">Отклонить</button>
+    </form>
+  {% endif %}
+
+  <hr>
+
+  <!-- Добавление списка предметов -->
+  <h4>Предметы и кредиты:</h4>
+  <ul>
+    {% for post_subject in post.post_subjects.all %}
+      <li>
+        {{ post_subject.subject.name }} - {{ post_subject.credits }} кредиты
+      </li>
+      {% empty %}
+      <li>Нет предметов для этого поста.</li>
+      {% endfor %}
+    </ul>
+    {% if post.pdf_file %}
+        <a href="{{ post.pdf_file.url }}" class="btn btn-outline-primary mt-3">Скачать заявление</a>
+    {% endif %}
+    
+    <a href="/media/protocols/post_{{ post.id }}_protocol.pdf" class="btn btn-outline-success mt-3" target="_blank">
+        Скачать протокол
+    </a>
+
+  <hr>
+  <h4>Комментарии:</h4>
+  <ul>
+    {% for comment in comments %}
+      <li><strong>{{ comment.author }}</strong>: {{ comment.text }} <br>
+          <small>{{ comment.created|date:"d.m.Y H:i" }}</small>
+      </li>
+    {% empty %}
+      <li>Комментариев пока нет.</li>
+    {% endfor %}
+  </ul>
+
+  {% if user.is_superuser %}
+  <br>
+  <form action="{% url 'post-delete' post.id %}" method="get">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить пост</button>
+  </form>
+
+  <br>
+  <a href="{% url 'post-update' post.id %}" class="btn btn-secondary">Обновить запись</a>
+  <br>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <hr>
+    <h4>Добавить комментарий:</h4>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="comment">
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+  {% else %}
+    <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
+  {% endif %}
+</div>
 
 
-<br>
-<form action="{% url 'post-delete' post.id %}" method="get">
-{% csrf_token %}
-<button type="submit">Удалить пост</button>
-</form>
-<br>
-
-<a href="{% url 'post-update' post.id %}">
-  <button type="submit">Обновить запись</button>
-</a>
 {% endblock %}

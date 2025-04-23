@@ -7,20 +7,6 @@ from django.contrib.auth.models import User
 
 
 
-# def register(request):
-#     if request.method == 'POST':
-#         user_form = UserRegistrationForms(request.POST)
-
-#         if user_form.is_valid():
-#             new_user = user_form.save(commit=False)
-#             new_user.set_password(user_form.cleaned_data['password'])
-#             new_user.save()
-#             return render(request, "registration/register_done.html", {"user": new_user})
-#     else:
-#         user_form = UserRegistrationForms()
-
-#     return render(request, "registration/register.html", {"form": user_form})
-
 class UserRegisterView(FormView):
     template_name = 'registration/register.html'
     form_class = UserRegistrationForms
@@ -34,10 +20,6 @@ class UserRegisterView(FormView):
         new_user.save()
         # Можно передать пользователя в шаблон, если хочешь отрендерить, а не редиректить
         return render(self.request, "registration/register_done.html", {"user": new_user})
-
-
-
-
 
 
 

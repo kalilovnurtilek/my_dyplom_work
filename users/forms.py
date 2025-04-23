@@ -32,5 +32,5 @@ class UserRegistrationForms(forms.ModelForm):
         return cd['password2']
 
     class Meta:
-        model = User  # ✅ Теперь указывает на CustomUser
+        model = User 
         fields = ("email", )

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Можно добавить предмет</h1>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Добавить предмет</button>
+    </form>
+
+    <h4>Существующие предметы</h4>
+    <form method="get">
+        <input type="text" name="q" placeholder="Поиск..." value="{{ request.GET.q }}">
+        <button type="submit">Искать</button>
+    </form>
+    
+    <ul>
+        {% for subject in subjects %} 
+            <li>{{ subject.name }}</li>  
+        {% empty %}
+            <li>Ничего не найдено.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

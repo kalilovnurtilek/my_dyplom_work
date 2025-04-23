@@ -26,14 +26,18 @@
                 <a class="nav-link active" aria-current="page" href="{% url 'index-page' %}">На главную</a>
               </li>
 
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{% url 'get-about' %}">О нас</a>
               </li>  
+             -->
             </ul>
-
-
             {% if user.is_authenticated %}
             <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+              <!-- {% if user.is_superuser %}
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Зарегистрировать пользователя</a>
+              </li>
+              {% endif %} -->
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="#">Пользователь: {{ user.get_username }}</a>
               </li>  
@@ -46,9 +50,7 @@
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Вход</a>
               </li>  
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Зарегистрироваться</a>
-              </li>
+              
             </ul>
 
             {% endif %}

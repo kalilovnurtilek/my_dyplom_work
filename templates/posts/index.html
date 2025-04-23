@@ -1,46 +1,150 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1>Это главная страница</h1>
-
-{% for post in posts %}
-<div class="card" style="width: 18rem;">
-    <div class="card-body">
-      <h5 class="card-title"> {{ post.title }} - </h5>
-      <h6 class="card-subtitle mb-2 text-body-secondary">{{ post.created }}</h6>
-      <p class="card-text">{{ post.content|truncatewords:10 }}</p>
-      <a href="{% url 'post-detail' post.pk %}" class="card-link">Читать полность</a>
-      <!-- <a href="#" class="card-link">Another link</a> -->
-    </div>
-</div>
-{% endfor %}
-<br>
-
-
-<ul>    
-  {% if user.is_authenticated %}
-    
-  <button type="button"><a href="{% url 'post-create' %}">Создать пост</a></button>
-  <button type="button"><a href="{% url 'upload_pdf' %}">загрузить Pdf</a></button>
+<div class="container mt-4">
+  {% if user.is_superuser %}
+    <h1>Вы админ</h1>
+  {% else %}
+    <h1>Это главная страница</h1>
   {% endif %}
-</ul>
-  
 
-    
-<!-- Блок PDF-документов -->
-<h2>Ваши PDF-документы</h2>
-{% if pdf_posts %}
-  {% for pdf in pdf_posts %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <h5 class="card-title">{{ pdf.title }}</h5>
-        <object data="{{ pdf.pdf_file.url }}" type="application/pdf" width="100%" height="400px">
-          <p>Ваш браузер не поддерживает просмотр PDF.
-          <a href="{{ pdf.pdf_file.url }}">Скачать PDF</a></p>
-        </object>
-      </div>
+  {% if user.is_authenticated %}
+    <div class="mb-3">
+      <button><a href="{% url 'post-create' %}">Создать пост</a></button>
+      <br>
+      {% if user.is_superuser %}
+        <button><a href="{% url 'register' %}">Зарегистрировать нового пользователя</a></button>
+        <br>
+        <button><a href="{% url 'admin-posts' %}">Список постов</a></button>
+        <br>
+        <button><a href="{% url 'create-special' %}">Добавить специальность</a></button>
+        <br>
+        <button><a href="{% url 'create-subject' %}">Добавить предмет</a></button>
+      {% endif %}
     </div>
-  {% endfor %}
-{% else %}
-  <p>Нет доступных PDF-документов.</p>
-{% endif %}
+
+    <hr>
+
+    <h2>📝 Мои посты</h2>
+    {% if my_posts %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Заголовок</th>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in my_posts %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
+              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+              <td>{{ post.status }}</td>
+              <td>
+                {% if post.status_approval == 'not_started' %}
+                  Ожидает начала
+                {% elif post.status_approval == 'in_progress' %}
+                  В процессе согласования
+                {% elif post.status_approval == 'approved' %}
+                  ✅ Одобрено
+                {% elif post.status_approval == 'rejected' %}
+                  ❌ Отклонено
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>У вас пока нет постов.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>📥 Посты, ожидающие вашего согласования</h2>
+    {% if approval_posts %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Заголовок</th>
+            <th>Автор</th>
+            <th>Дата</th>
+            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in approval_posts %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
+              <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
+              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if post.status_approval == 'not_started' %}
+                  Ожидает начала
+                {% elif post.status_approval == 'in_progress' %}
+                  В процессе согласования
+                {% elif post.status_approval == 'approved' %}
+                  ✅ Одобрено
+                {% elif post.status_approval == 'rejected' %}
+                  ❌ Отклонено
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Нет постов, ожидающих вашего согласования.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>✅ Посты, которые вы уже согласовали</h2>
+    {% if approved_posts %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Заголовок</th>
+            <th>Автор</th>
+            <th>Дата</th>
+            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in approved_posts %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
+              <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
+              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if post.status_approval == 'not_started' %}
+                  Ожидает начала
+                {% elif post.status_approval == 'in_progress' %}
+                  В процессе согласования
+                {% elif post.status_approval == 'approved' %}
+                  ✅ Одобрено
+                {% elif post.status_approval == 'rejected' %}
+                  ❌ Отклонено
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Нет постов, которые вы уже согласовали.</p>
+    {% endif %}
+
+  {% else %}
+    <p>Пожалуйста, войдите в систему, чтобы просматривать и создавать посты.</p>
+  {% endif %}
+</div>
 {% endblock %}

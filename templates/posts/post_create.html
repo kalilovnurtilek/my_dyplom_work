@@ -1,14 +1,89 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
 {% block content %}
-    <h1>Страница post_create</h1>  
-    
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Создать запись</button>
-    </form>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="{{ form.title.id_for_label }}">Заголовок</label>
+    {{ form.title }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.content.id_for_label }}">Содержимое</label>
+    {{ form.content }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.status.id_for_label }}">Статус</label>
+    {{ form.status }}
+  </div>
 
 
 
- {% include "posts/includes/link_include.html" %}
+  <div class="mb-3">
+    <label for="{{ form.pdf_file.id_for_label }}">Заявление студента (PDF/скан)</label>
+    {{ form.pdf_file }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.specialty.id_for_label }}">Приоритетная специальность</label>
+    {{ form.specialty }}
+    {% if form.specialty.errors %}
+      <div class="text-danger">{{ form.specialty.errors }}</div>
+    {% endif %}
+  </div>
+
+
+  <h4 class="mt-4">Предметы и кредиты:</h4>
+  <div id="subject-credits">
+    <div class="subject-credit mb-2 d-flex gap-2">
+      <select name="subjects[]" class="form-control">
+        {% for subject in subjects %}
+          <option value="{{ subject.id }}">{{ subject.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="credits[]" class="form-control" placeholder="Кредиты" step="0.5" min="0">
+    </div>
+  </div>
+  <button type="button" class="btn btn-secondary mt-2" onclick="addSubjectCredit()">+ Добавить предмет</button>
+  
+  <script>
+    function addSubjectCredit() {
+      const div = document.querySelector('.subject-credit').cloneNode(true);
+      div.querySelector('select').value = "";
+      div.querySelector('input').value = "";
+      document.getElementById('subject-credits').appendChild(div);
+    }
+  </script>
+  
+
+
+
+
+  <h4 class="mt-4">Маршрут согласования:</h4>
+  <div id="approval-steps">
+    <div class="approval-step mb-2">
+      <label>Выберите пользователя:</label>
+      <select name="approvers[]" class="form-control">
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
+  <br><br>
+  <button type="submit" class="btn btn-primary">Создать запись</button>
+</form>
+
+<script>
+  function addApprovalStep() {
+    const step = document.querySelector('.approval-step').cloneNode(true);
+    step.querySelector('select').value = "";
+    document.getElementById('approval-steps').appendChild(step);
+  }
+</script>
 {% endblock %}

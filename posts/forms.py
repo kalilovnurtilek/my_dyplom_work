@@ -1,22 +1,31 @@
 from django import forms
-from .models import PDFPost
-from posts.models import Comment, Post
+from posts.models import Post, Comment, Specialty, Subject
 
-class CommentForm(forms.ModelForm):
+class SubjectForm(forms.ModelForm):
     class Meta:
-        model = Comment
-        fields =("name","text")
+        model = Subject
+        fields = ['name']
+
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ("title", "content")
-
-
-class PDFPostForm(forms.ModelForm):
-    class Meta:
-        model = PDFPost
-        fields = ['title', 'pdf_file', 'allowed_users']
+        fields = [
+            'title',
+            'content',
+            'status',
+            'specialty',
+            'pdf_file',  # исправили на pdf_file
+        ]
         widgets = {
-            'allowed_users': forms.CheckboxSelectMultiple
+            'specialty': forms.Select(),
         }
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+
+class SpecialtyForm(forms.ModelForm):
+    class Meta:
+        model = Specialty
+        fields = ['name','code']
