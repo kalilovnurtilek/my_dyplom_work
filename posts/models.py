@@ -67,6 +67,9 @@ class Post(models.Model):
         ordering = ['-created']
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
+
+
+
 class ApprovalStep(models.Model):
     post = models.ForeignKey(Post, related_name='approval_steps', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -78,6 +81,7 @@ class ApprovalStep(models.Model):
         return f"{self.user.get_full_name()} - Этап {self.order}"
 
     
+
 class Subject(models.Model):
     name = models.CharField(max_length=255, unique=True)
 

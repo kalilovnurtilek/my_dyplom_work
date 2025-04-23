@@ -5,8 +5,6 @@ from django.shortcuts import render
 from .forms import UserRegistrationForms
 from django.contrib.auth.models import User
 
-
-
 class UserRegisterView(FormView):
     template_name = 'registration/register.html'
     form_class = UserRegistrationForms
@@ -20,8 +18,6 @@ class UserRegisterView(FormView):
         new_user.save()
         # Можно передать пользователя в шаблон, если хочешь отрендерить, а не редиректить
         return render(self.request, "registration/register_done.html", {"user": new_user})
-
-
 
 
 def logout_view(request):

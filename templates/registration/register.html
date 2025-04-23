@@ -5,9 +5,9 @@
 {% block content %}
 <h1>Создать аккаунт</h1>
     <p>Зарегистрируйтесь введя следующие данные</p>
-    <form action="" method="post">
+    <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Создать аккаунт">
-    </form>
+        <button type="submit">Зарегистрироваться</button>
+      </form>
 {% endblock %}

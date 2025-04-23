@@ -61,21 +61,57 @@
 
 
 
-
   <h4 class="mt-4">Маршрут согласования:</h4>
   <div id="approval-steps">
-    <div class="approval-step mb-2">
+    <div class="approval-step mb-2 d-flex gap-2">
       <label>Выберите пользователя:</label>
       <select name="approvers[]" class="form-control">
         {% for user in users %}
           <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
         {% endfor %}
       </select>
+      <button type="button" class="btn btn-danger" onclick="removeApprover(this)">Удалить пользователя</button>
+      <button type="button" class="btn btn-warning" onclick="moveUp(this)">↑</button>
+      <button type="button" class="btn btn-warning" onclick="moveDown(this)">↓</button>
     </div>
   </div>
-
+  
   <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
-  <br><br>
+  
+  <script>
+    function addApprovalStep() {
+      const step = document.querySelector('.approval-step').cloneNode(true);
+      step.querySelector('select').value = ""; // Очистка значения
+      document.getElementById('approval-steps').appendChild(step);
+    }
+  
+    function removeApprover(button) {
+      const step = button.closest('.approval-step');
+      step.remove(); // Удаляет шаг
+    }
+  
+    function moveUp(button) {
+      const step = button.closest('.approval-step');
+      const previousStep = step.previousElementSibling;
+      if (previousStep) {
+        document.getElementById('approval-steps').insertBefore(step, previousStep);
+      }
+    }
+  
+    function moveDown(button) {
+      const step = button.closest('.approval-step');
+      const nextStep = step.nextElementSibling;
+      if (nextStep) {
+        document.getElementById('approval-steps').insertBefore(nextStep, step);
+      }
+    }
+  </script>
+  
+  
+  
+  
+  
+  <br>
   <button type="submit" class="btn btn-primary">Создать запись</button>
 </form>
 
