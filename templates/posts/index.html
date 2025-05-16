@@ -1,150 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-  {% if user.is_superuser %}
-    <h1>Вы админ</h1>
-  {% else %}
-    <h1>Это главная страница</h1>
-  {% endif %}
+<div class="container mx-auto mt-10 px-4 space-y-12">
+  <!-- HEADER -->
+  <header class="flex items-center gap-3">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {% if user.is_superuser %}
+        Панель администратора
+      {% else %}
+        Добро пожаловать!
+      {% endif %}
+    </h1>
+  </header>
 
   {% if user.is_authenticated %}
-    <div class="mb-3">
-      <button><a href="{% url 'post-create' %}">Создать пост</a></button>
-      <br>
+    <!-- ACTION BUTTONS -->
+    <section class="flex flex-wrap gap-4">
+      <a href="{% url 'post-create' %}" class="btn-primary flex items-center gap-2"><i class="i-lucide-plus"></i> Создать пост</a>
       {% if user.is_superuser %}
-        <button><a href="{% url 'register' %}">Зарегистрировать нового пользователя</a></button>
-        <br>
-        <button><a href="{% url 'admin-posts' %}">Список постов</a></button>
-        <br>
-        <button><a href="{% url 'create-special' %}">Добавить специальность</a></button>
-        <br>
-        <button><a href="{% url 'create-subject' %}">Добавить предмет</a></button>
+        <a href="{% url 'register' %}" class="btn-secondary">➕ Новый пользователь</a>
+        <a href="{% url 'admin-posts' %}" class="btn-secondary">📋 Все посты</a>
+        <a href="{% url 'create-special' %}" class="btn-secondary">🏷️ Специальность</a>
+        <a href="{% url 'create-subject' %}" class="btn-secondary">📚 Предмет</a>
       {% endif %}
-    </div>
+    </section>
 
-    <hr>
+    <!-- MY POSTS -->
+    {% include 'partials/posts_table.html' with title='📝 Мои посты' posts=my_posts show_owner=False %}
 
-    <h2>📝 Мои посты</h2>
-    {% if my_posts %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Заголовок</th>
-            <th>Дата</th>
-            <th>Статус</th>
-            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in my_posts %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
-              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
-              <td>{{ post.status }}</td>
-              <td>
-                {% if post.status_approval == 'not_started' %}
-                  Ожидает начала
-                {% elif post.status_approval == 'in_progress' %}
-                  В процессе согласования
-                {% elif post.status_approval == 'approved' %}
-                  ✅ Одобрено
-                {% elif post.status_approval == 'rejected' %}
-                  ❌ Отклонено
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>У вас пока нет постов.</p>
-    {% endif %}
+    <!-- FOR APPROVAL -->
+    {% include 'partials/posts_table.html' with title='📥 На согласование' posts=approval_posts show_owner=True %}
 
-    <hr>
-
-    <h2>📥 Посты, ожидающие вашего согласования</h2>
-    {% if approval_posts %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Заголовок</th>
-            <th>Автор</th>
-            <th>Дата</th>
-            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in approval_posts %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
-              <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
-              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
-              <td>
-                {% if post.status_approval == 'not_started' %}
-                  Ожидает начала
-                {% elif post.status_approval == 'in_progress' %}
-                  В процессе согласования
-                {% elif post.status_approval == 'approved' %}
-                  ✅ Одобрено
-                {% elif post.status_approval == 'rejected' %}
-                  ❌ Отклонено
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Нет постов, ожидающих вашего согласования.</p>
-    {% endif %}
-
-    <hr>
-
-    <h2>✅ Посты, которые вы уже согласовали</h2>
-    {% if approved_posts %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Заголовок</th>
-            <th>Автор</th>
-            <th>Дата</th>
-            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in approved_posts %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
-              <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
-              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
-              <td>
-                {% if post.status_approval == 'not_started' %}
-                  Ожидает начала
-                {% elif post.status_approval == 'in_progress' %}
-                  В процессе согласования
-                {% elif post.status_approval == 'approved' %}
-                  ✅ Одобрено
-                {% elif post.status_approval == 'rejected' %}
-                  ❌ Отклонено
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Нет постов, которые вы уже согласовали.</p>
-    {% endif %}
+    <!-- APPROVED -->
+    {% include 'partials/posts_table.html' with title='✅ Согласованные' posts=approved_posts show_owner=True %}
 
   {% else %}
-    <p>Пожалуйста, войдите в систему, чтобы просматривать и создавать посты.</p>
+    <p class="text-xl">Пожалуйста, войдите в систему, чтобы продолжить.</p>
   {% endif %}
 </div>
 {% endblock %}
+
+{# Tailwind Styles #}
+<style>
+.btn-primary{@apply px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg transition font-medium;}
+.btn-secondary{@apply px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-2xl shadow-sm transition;}
+.table-header{@apply bg-gray-100 text-sm uppercase tracking-wide text-gray-600;}
+.table-cell{@apply px-4 py-3;}
+</style>

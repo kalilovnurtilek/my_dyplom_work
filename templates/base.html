@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,71 +7,100 @@
         {% if title %}
             {{ title }}
         {% else %}
-            Какая то страница
+            Какая-то страница
         {% endif %}
-        </title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Arial', sans-serif;
+        }
+        .navbar {
+            background-color: #003366; /* Темно-синий */
+        }
+        .navbar-nav .nav-link {
+            color: white;
+        }
+        .navbar-nav .nav-link:hover {
+            color: #ffd700;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #003366; /* Темно-синий */
+            color: white;
+        }
+        .btn-custom {
+            background-color: #003366; /* Темно-синий */
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #002244; /* Более темный синий */
+            color: white;
+        }
+        .footer-text {
+            text-align: center;
+            position: fixed;
+            bottom: 10px;
+            right: 10px; /* Выравнивание по правому краю */
+            color: rgba(160, 160, 160, 0.5); /* Полупрозрачный серый */
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">MyProject</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'index-page' %}">На главную</a>
-              </li>
+            <a class="navbar-brand" href="#">MyProject</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'index-page' %}">Главная</a>
+                    </li>
+                </ul>
 
-              <!-- <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'get-about' %}">О нас</a>
-              </li>  
-             -->
-            </ul>
-            {% if user.is_authenticated %}
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <!-- {% if user.is_superuser %}
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Зарегистрировать пользователя</a>
-              </li>
-              {% endif %} -->
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Пользователь: {{ user.get_username }}</a>
-              </li>  
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">Выход</a>
-              </li>
-            </ul>
-            {% else %}  
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Вход</a>
-              </li>  
-              
-            </ul>
-
-            {% endif %}
-          </div>
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Пользователь: {{ user.get_username }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Выход</a>
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Вход</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
         </div>
-      </nav>
+    </nav>
 
-    {% block content %}
-    {% endblock %}
+    <div class="container">
+        {% block content %}
+        <!-- Основной контент страницы будет сюда -->
+        {% endblock %}
+    </div>
 
-    <!-- <ul>    
-      {% if user.is_authenticated %}
-          <li>Пользователь: {{ user.get_username }}</li>
-          <li><a href="{% url 'logout' %}">Выход</a></li>
-      {% else %}      
-          <li><a href="{% url 'login' %}">Вход</a></li>
-          <li><a href="{% url 'register' %}">Зарегистрироваться</a></li>
-      {% endif %}
-    </ul> -->
+    <!-- Footer -->
+    <div class="footer-text">
+        by Kalilov
+    </div>
 
-  <!-- {% include "posts/includes/link_include.html" %} -->
+    <!-- Подключение Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

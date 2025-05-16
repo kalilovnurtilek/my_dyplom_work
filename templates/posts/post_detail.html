@@ -2,27 +2,44 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h1>{{ post.title }}</h1>
+  <h1><strong>ФИО студента:</strong> {{ post.title }}</h1>
   <p><strong>Автор:</strong> {{ post.owner.get_full_name }}</p>
-  <p>{{ post.content }}</p>
+  <p><strong>Категория: </strong>{{ post.content }}</p>
+  <p><strong>Курc: </strong>{{ post.cours }}<strong>-курс</strong></p>
 
   {% if post.pdf_file %}
     <h3>Загруженный PDF:</h3>
-    <a href="{{ post.pdf_file.url }}" target="_blank">Скачать PDF</a>
+    <iframe src="{{ post.pdf_file.url }}" width="100%" height="600px" style="border: 1px solid #ccc;"></iframe>
+    <p><a href="{{ post.pdf_file.url }}" target="_blank" class="btn btn-outline-primary mt-2">Скачать PDF</a></p>
   {% endif %}
 
   <p><strong>Статус:</strong> 
-    {% if post.status == 'draft' %} Черновик 
-    {% elif post.status == 'published' %} ✅ Опубликован 
-    {% endif %}
+    <span class="badge 
+      {% if post.status == 'published' %}
+        badge-green
+      {% else %}
+        badge-gray
+      {% endif %}">
+      {% if post.status == 'published' %}✅ Опубликован{% else %}Черновик{% endif %}
+    </span>
   </p>
   
   <p><strong>Статус согласования:</strong> 
-    {% if post.status_approval == 'not_started' %} Ожидает начала
-    {% elif post.status_approval == 'in_progress' %} В процессе согласования
-    {% elif post.status_approval == 'approved' %} ✅ Одобрено
-    {% elif post.status_approval == 'rejected' %} ❌ Отклонено
-    {% endif %}
+    <span class="badge 
+      {% if post.status_approval == 'approved' %}
+        badge-green
+      {% elif post.status_approval == 'in_progress' %}
+        badge-yellow
+      {% elif post.status_approval == 'not_started' %}
+        badge-gray
+      {% else %}
+        badge-red
+      {% endif %}">
+      {% if post.status_approval == 'approved' %}Одобрено
+      {% elif post.status_approval == 'in_progress' %}В процессе
+      {% elif post.status_approval == 'not_started' %}Ожидает
+      {% else %}Отклонено{% endif %}
+    </span>
   </p>
 
   {% if post.current_approver %}
@@ -69,17 +86,17 @@
       <li>
         {{ post_subject.subject.name }} - {{ post_subject.credits }} кредиты
       </li>
-      {% empty %}
+    {% empty %}
       <li>Нет предметов для этого поста.</li>
-      {% endfor %}
-    </ul>
-    {% if post.pdf_file %}
-        <a href="{{ post.pdf_file.url }}" class="btn btn-outline-primary mt-3">Скачать заявление</a>
-    {% endif %}
-    
-    <a href="/media/protocols/post_{{ post.id }}_protocol.pdf" class="btn btn-outline-success mt-3" target="_blank">
-        Скачать протокол
-    </a>
+    {% endfor %}
+  </ul>
+  {% if post.pdf_file %}
+    <a href="{{ post.pdf_file.url }}" class="btn btn-outline-primary mt-3">Скачать заявление</a>
+  {% endif %}
+  
+  <a href="/media/protocols/post_{{ post.id }}_protocol.pdf" class="btn btn-outline-success mt-3" target="_blank">
+    Скачать протокол
+  </a>
 
   <hr>
   <h4>Комментарии:</h4>
@@ -93,7 +110,26 @@
     {% endfor %}
   </ul>
 
-  {% if user.is_superuser %}
+  {% if user.is_authenticated %}
+    <h4 class="mb-3">Добавить комментарий:</h4>
+    <form method="post" class="bg-light p-3 rounded shadow-sm">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="comment">
+      
+      <div class="mb-2">
+        <textarea name="text" class="form-control" rows="3" placeholder="Ваш комментарий..." style="resize: none;"></textarea>
+      </div>
+      
+      <button type="submit" class="btn btn-primary w-100">Отправить</button>
+    </form>
+  {% else %}
+    <div class="alert alert-warning mt-4">
+      Вы должны быть авторизованы, чтобы оставить комментарий.
+    </div>
+  {% endif %} 
+</div>
+
+{% if user.is_superuser %}
   <br>
   <form action="{% url 'post-delete' post.id %}" method="get">
     {% csrf_token %}
@@ -103,21 +139,6 @@
   <br>
   <a href="{% url 'post-update' post.id %}" class="btn btn-secondary">Обновить запись</a>
   <br>
-  {% endif %}
-
-  {% if user.is_authenticated %}
-    <hr>
-    <h4>Добавить комментарий:</h4>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="comment">
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Отправить</button>
-    </form>
-  {% else %}
-    <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
-  {% endif %}
-</div>
-
+{% endif %}
 
 {% endblock %}

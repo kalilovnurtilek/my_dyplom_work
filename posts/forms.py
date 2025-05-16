@@ -1,5 +1,5 @@
 from django import forms
-from posts.models import Post, Comment, Specialty, Subject
+from posts.models import Post, Comment, Specialty, Subject,Cours
 
 class SubjectForm(forms.ModelForm):
     class Meta:
@@ -12,11 +12,13 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = [
             'title',
-            'content',
+            'content', 
             'status',
             'specialty',
-            'pdf_file',  # исправили на pdf_file
+            'pdf_file',
+            'cours',  
         ]
+        cours = forms.ModelChoiceField(queryset=Cours.objects.all(), required=False)
         widgets = {
             'specialty': forms.Select(),
         }
@@ -25,7 +27,13 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['text']
 
+    def clean_text(self):
+        text = self.cleaned_data.get('text')
+        if not text:
+            raise forms.ValidationError("Комментарий не может быть пустым.")
+        return text
+
 class SpecialtyForm(forms.ModelForm):
     class Meta:
         model = Specialty
-        fields = ['name','code']
+        fields = ['name','short_name', 'code', ]

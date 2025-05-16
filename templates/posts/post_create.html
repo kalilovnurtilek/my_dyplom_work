@@ -20,8 +20,6 @@
     {{ form.status }}
   </div>
 
-
-
   <div class="mb-3">
     <label for="{{ form.pdf_file.id_for_label }}">Заявление студента (PDF/скан)</label>
     {{ form.pdf_file }}
@@ -35,6 +33,16 @@
     {% endif %}
   </div>
 
+  <h4 class="mt-4">Приоритетный курс:</h4>
+  <div class="mb-3">
+    <label for="{{ form.cours.id_for_label }}">Курс студента</label>
+    <select name="course" class="form-control" required>
+      <option value="">Выберите курс</option>
+      {% for course in courses %}
+        <option value="{{ course.id }}">{{ course.cours }}</option>
+      {% endfor %}
+    </select>
+  </div>
 
   <h4 class="mt-4">Предметы и кредиты:</h4>
   <div id="subject-credits">
@@ -48,7 +56,7 @@
     </div>
   </div>
   <button type="button" class="btn btn-secondary mt-2" onclick="addSubjectCredit()">+ Добавить предмет</button>
-  
+
   <script>
     function addSubjectCredit() {
       const div = document.querySelector('.subject-credit').cloneNode(true);
@@ -57,39 +65,57 @@
       document.getElementById('subject-credits').appendChild(div);
     }
   </script>
-  
-
-
 
   <h4 class="mt-4">Маршрут согласования:</h4>
   <div id="approval-steps">
     <div class="approval-step mb-2 d-flex gap-2">
-      <label>Выберите пользователя:</label>
+      <label class="col-form-label">Выберите пользователя:</label>
       <select name="approvers[]" class="form-control">
         {% for user in users %}
           <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
         {% endfor %}
       </select>
-      <button type="button" class="btn btn-danger" onclick="removeApprover(this)">Удалить пользователя</button>
+      <button type="button" class="btn btn-danger" onclick="removeApprover(this)">Удалить</button>
       <button type="button" class="btn btn-warning" onclick="moveUp(this)">↑</button>
       <button type="button" class="btn btn-warning" onclick="moveDown(this)">↓</button>
     </div>
   </div>
-  
-  <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
-  
+
+  <button type="button" class="btn btn-secondary mt-2 btn-add-step" onclick="addApprovalStep()">+ Добавить этап</button>
+
+  <style>
+    .btn-add-step {
+      background-color: #6c757d;
+      color: white;
+      border-radius: 25px;
+      padding: 10px 20px;
+      font-size: 16px;
+      transition: background-color 0.3s, transform 0.2s ease;
+    }
+
+    .btn-add-step:hover {
+      background-color: #5a6268;
+      transform: scale(1.05);
+    }
+
+    .btn-add-step:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  </style>
+
   <script>
     function addApprovalStep() {
       const step = document.querySelector('.approval-step').cloneNode(true);
-      step.querySelector('select').value = ""; // Очистка значения
+      step.querySelector('select').value = "";
       document.getElementById('approval-steps').appendChild(step);
     }
-  
+
     function removeApprover(button) {
       const step = button.closest('.approval-step');
-      step.remove(); // Удаляет шаг
+      step.remove();
     }
-  
+
     function moveUp(button) {
       const step = button.closest('.approval-step');
       const previousStep = step.previousElementSibling;
@@ -97,7 +123,7 @@
         document.getElementById('approval-steps').insertBefore(step, previousStep);
       }
     }
-  
+
     function moveDown(button) {
       const step = button.closest('.approval-step');
       const nextStep = step.nextElementSibling;
@@ -106,11 +132,52 @@
       }
     }
   </script>
-  
-  
-  
-  
-  
+
+  <style>
+    .approval-step {
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .approval-step label {
+      font-weight: bold;
+    }
+
+    .approval-step select {
+      flex: 1;
+    }
+
+    .approval-step button {
+      margin-top: 5px;
+    }
+
+    .approval-step .d-flex {
+      align-items: center;
+    }
+
+    .approval-step .btn-warning {
+      margin: 0 5px;
+    }
+
+    #approval-steps {
+      margin-top: 20px;
+    }
+
+    .btn-custom {
+      background-color: #003366;
+      color: white;
+    }
+
+    .btn-custom:hover {
+      background-color: #002244;
+      color: white;
+    }
+  </style>
+
   <br>
   <button type="submit" class="btn btn-primary">Создать запись</button>
 </form>

@@ -4,13 +4,32 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
-from posts.models import Post, ApprovalStep, Specialty, Subject, PostSubject
+from posts.models import Post, ApprovalStep, Specialty, Subject, PostSubject, Cours
 from posts.forms import PostForm, CommentForm, SpecialtyForm, SubjectForm
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
-# from .utils.pdf_generator import generate_post_pdf  # добавили
+from django.contrib import messages
+from .utils.pdf_generator import generate_post_pdf 
+from datetime import datetime
+
+
+
+def generate_unique_protocol_number():
+    year = datetime.now().year
+    last_post = Post.objects.filter(protocol_number__startswith=str(year)).order_by('-id').first()
+
+    if last_post and '/' in last_post.protocol_number:
+        try:
+            last_number = int(last_post.protocol_number.split('/')[-1])
+        except ValueError:
+            last_number = 0
+    else:
+        last_number = 0
+
+    return f"{year}/{last_number + 1:03}"
+
 
 
 
@@ -35,7 +54,7 @@ class SuperuserPostListView(UserPassesTestMixin, ListView):
 
 
 
-from .utils.pdf_generator import generate_post_pdf  # Импортируем функцию генерации PDF
+ 
 
 class PostCreateView(generic.CreateView):
     model = Post
@@ -46,37 +65,61 @@ class PostCreateView(generic.CreateView):
         context = super().get_context_data(**kwargs)
         context['users'] = get_user_model().objects.all()
         context['subjects'] = Subject.objects.all()
+        context['courses'] = Cours.objects.all()  # Добавляем курсы в контекст
         return context
 
     def form_valid(self, form):
+        post = self._save_post(form)
+        self._create_approval_steps(post)
+        self._attach_subjects_with_credits(post)
+        generate_post_pdf(post)
+        return redirect('index-page')
+
+    def _save_post(self, form):
+    
         post = form.save(commit=False)
         post.owner = self.request.user
-        post.save()  # Сохраняем пост
 
+    
+        course_id = self.request.POST.get('course')
+        if course_id:
+            try:
+                course = Cours.objects.get(pk=course_id)
+                post.cours = course
+            except Cours.DoesNotExist:
+                pass
+
+    
+        post.protocol_number = generate_unique_protocol_number()
+
+        post.save()
         form.save_m2m()
+        return post
 
-        # Создание этапов согласования
+
+    def _create_approval_steps(self, post):
+        """Создаём этапы согласования для поста."""
         approver_ids = self.request.POST.getlist('approvers[]')
-        for i, uid in enumerate(approver_ids):
-            user = get_user_model().objects.get(pk=uid)
-            ApprovalStep.objects.create(post=post, user=user, order=i+1)
+        for order, user_id in enumerate(approver_ids, start=1):
+            try:
+                user = get_user_model().objects.get(pk=user_id)
+                ApprovalStep.objects.create(post=post, user=user, order=order)
+            except get_user_model().DoesNotExist:
+                continue 
 
-        # Привязка предметов с указанными кредитами
+    def _attach_subjects_with_credits(self, post):
+        """Привязываем предметы к посту с указанными кредитами."""
         subject_ids = self.request.POST.getlist('subjects[]')
         credits = self.request.POST.getlist('credits[]')
 
-        for sid, credit in zip(subject_ids, credits):
-            if sid and credit:
+        for subject_id, credit in zip(subject_ids, credits):
+            if subject_id and credit:
                 try:
-                    subject = Subject.objects.get(pk=sid)
+                    subject = Subject.objects.get(pk=subject_id)
                     PostSubject.objects.create(post=post, subject=subject, credits=float(credit))
                 except (Subject.DoesNotExist, ValueError):
-                    continue  # просто пропускаем некорректные значения
+                    continue
 
-        # Генерация PDF после того как пост создан
-        generate_post_pdf(post)  # Вызов функции для генерации PDF-протокола
-
-        return redirect('index-page')
 
 class PostDetailView(generic.DetailView):
     model = Post
@@ -87,69 +130,76 @@ class PostDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         post = self.get_object()
         
-        # Получаем все комментарии для поста
+        # Загружаем все комментарии для поста
         context['comments'] = post.comment_set.all()
         
-        # Форма для добавления комментария
+        # Форма для добавления нового комментария
         context['form'] = CommentForm()
 
         user = self.request.user
         if user.is_authenticated:
-            # Получаем текущий шаг согласования, если он есть
+            # Получаем текущий этап согласования
             current_step = post.approval_steps.filter(is_approved=None).order_by('order').first()
             context['can_approve'] = current_step and current_step.user == user
             context['approval_step'] = current_step
 
-        # Получаем все шаги согласования
+        # Все этапы согласования
         context['approval_steps'] = post.approval_steps.select_related('user')
 
-        # Получаем связанные предметы и кредиты
+        # Предметы, связанные с постом
         context['post_subjects'] = post.post_subjects.all()
 
         return context
 
     def post(self, request, *args, **kwargs):
-        post = self.get_object()
+        self.object = self.get_object()  # Получаем сам пост
+        post = self.object
         action = request.POST.get("action")
 
-        if action == "approval":
-            # Получаем текущий шаг согласования
-            current_step = post.approval_steps.filter(is_approved=None).order_by("order").first()
-            if current_step and current_step.user == request.user:
-                # Сохраняем результат согласования
-                current_step.is_approved = "approve" in request.POST
-                current_step.reviewed_at = timezone.now()
-                current_step.save()
-
-                # Если отклонено, ставим статус черновик
-                if not current_step.is_approved:
-                    post.status = "draft"
-                    post.save()
-                # Если все шаги согласования завершены и одобрены, публикуем пост
-                elif not post.approval_steps.filter(is_approved=None).exists():
-                    post.status = "published"
-                    post.save()
-
-            return redirect("post-detail", pk=post.pk)
-
-        elif action == "comment":
-            form = CommentForm(request.POST)
-            if form.is_valid():
-                # Сохраняем комментарий
-                comment = form.save(commit=False)
-                comment.post = post
-                comment.author = request.user.get_full_name() or request.user.email
-                comment.save()
-
-            return redirect("post-detail", pk=post.pk)
+        if action == "approval" and request.user.is_authenticated:
+            return self.handle_approval(request, post)
+        
+        elif action == "comment" and request.user.is_authenticated:
+            return self.handle_comment(request, post)
 
         return redirect("post-detail", pk=post.pk)
 
+    def handle_approval(self, request, post):
+        current_step = post.approval_steps.filter(is_approved=None).order_by("order").first()
+        if current_step and current_step.user == request.user:
+            current_step.is_approved = 'approve' in request.POST
+            current_step.reviewed_at = timezone.now()
+            current_step.save()
 
+            if current_step.is_approved:
+                # Если все этапы согласования завершены
+                if not post.approval_steps.filter(is_approved=None).exists():
+                    post.status = "published"
+            else:
+                # Если кто-то отклонил, пост становится черновиком
+                post.status = "draft"
+            
+            post.save()
+
+        return redirect("post-detail", pk=post.pk)
+
+    def handle_comment(self, request, post):
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user.get_full_name() or request.user.email
+            comment.save()
+        else:
+            # Если форма невалидна, выводим сообщение об ошибке
+            messages.error(request, "Ошибка при добавлении комментария. Пожалуйста, попробуйте снова.")
+
+        return redirect("post-detail", pk=post.pk)
+    
 class CreateSpecialtyView(generic.CreateView):
     model = Specialty
     template_name = 'posts/specialty_create.html'
-    fields=["name","code"]
+    fields=["name", 'short_name', "code",]
     success_url = reverse_lazy("create-special")
     form = SpecialtyForm ,   
 
@@ -164,9 +214,9 @@ class CreateSpecialtyView(generic.CreateView):
     
 
 class CreateSubjectView(generic.CreateView):
-    model = Subject
+    model = Subject 
     template_name = 'posts/subject_create.html'
-    form_class = SubjectForm  # Указываем форму, если хотим использовать кастомную форму
+    form_class = SubjectForm  
     success_url = reverse_lazy("create-subject")
 
     def get_context_data(self, **kwargs):
@@ -215,6 +265,8 @@ class AboutView(generic.TemplateView):
     }
     
 
+
+
 class PostDeleteView(generic.DeleteView):
     model = Post
-    success_url= reverse_lazy("index-page")
+    success_url= reverse_lazy("admin-posts")

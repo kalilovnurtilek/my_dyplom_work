@@ -1,0 +1,49 @@
+{# универсальная таблица постов #}
+{% if title %}
+  <h2 class="text-2xl font-semibold mb-4">{{ title }}</h2>
+{% endif %}
+
+{% if posts %}
+  <div class="overflow-x-auto rounded-2xl shadow">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-100 text-sm uppercase tracking-wide text-gray-600">
+        <tr>
+          <th class="px-4 py-3">№</th>
+          <th class="px-4 py-3 text-left">Заголовок</th>
+          {% if show_owner %}
+            <th class="px-4 py-3 text-left">Автор</th>
+          {% endif %}
+          <th class="px-4 py-3">Дата</th>
+          <th class="px-4 py-3">Статус</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for post in posts %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-center">{{ forloop.counter }}</td>
+            <td class="px-4 py-3">
+              <a href="{% url 'post-detail' post.pk %}" class="text-indigo-600 hover:underline">
+                {{ post.title }}
+              </a>
+            </td>
+            {% if show_owner %}
+              <td class="px-4 py-3">{{ post.owner.get_full_name|default:post.owner.email }}</td>
+            {% endif %}
+            <td class="px-4 py-3 text-center">{{ post.created|date:"d.m.Y H:i" }}</td>
+            <td class="px-4 py-3 text-center">
+              {% if post.status_approval == 'not_started' %}⏳
+              {% elif post.status_approval == 'in_progress' %}🔄
+              {% elif post.status_approval == 'approved' %}✅
+              {% elif post.status_approval == 'rejected' %}❌
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td class="px-4 py-6 text-center italic text-gray-500" colspan="5">Нет данных.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="italic text-gray-500">Нет записей.</p>
+{% endif %}
