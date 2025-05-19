@@ -9,8 +9,16 @@ admin.site.register(PostSubject)
 
 @admin.register(Specialty)
 class SpecialtyAdmin(admin.ModelAdmin):
-    list_display = ['name','code']
+    list_display = ['name', 'code', 'get_curriculum']
     list_filter = ['name']
+
+    def get_curriculum(self, obj):
+        if obj.curriculum_file:
+            return f'<a href="{obj.curriculum_file.url}" target="_blank">Скачать PDF</a>'
+        return 'Нет файла'
+    get_curriculum.short_description = 'Учебный план'
+    get_curriculum.allow_tags = True
+
     
 
   

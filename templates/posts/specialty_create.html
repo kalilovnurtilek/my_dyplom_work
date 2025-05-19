@@ -1,27 +1,35 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-    <h1>Можно добавить специальность</h1>
 
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Добавить специальность</button>
-    </form>
+<h1>Добавление специальности</h1>
 
-    <h4>Существующие специальности</h4>
-    <form method="get">
-        <input type="text" name="q" placeholder="Поиск..." value="{{ request.GET.q }}">
-        <button type="submit">Искать</button>
-    </form>
-    
-    <ul>
-        {% for specialty in specialties %}
-            <li>{{ specialty.name }} ({{ specialty.code }})</li>
-        {% empty %}
-            <li>Ничего не найдено.</li>
-        {% endfor %}
-    </ul>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить</button>
+</form>
 
+<hr>
+
+<h2>Список специальностей</h2>
+
+<form method="get">
+    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Поиск специальности">
+    <button type="submit">Найти</button>
+</form>
+
+<ul>
+{% for specialty in specialties %}
+    <li>
+        {{ specialty.name }}
+        {% if specialty.curriculum_file %}
+            — <a href="{{ specialty.curriculum_file.url }}">Учебный план (PDF)</a>
+        {% endif %}
+    </li>
+{% empty %}
+    <li>Ничего не найдено.</li>
+{% endfor %}
+</ul>
 
 {% endblock %}
