@@ -26,91 +26,144 @@
 
   <hr>
 
-  <!-- Студенттин документтери -->
-  <h2>Студенттин документтери</h2>
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label for="{{ form.pdf_file.id_for_label }}">Студенттин арызы (PDF/скан) <span class="text-danger">*</span></label>
-      {{ form.pdf_file|add_class:"form-control" }}
-      <small class="form-text text-muted">PDF же скан түрүндө арызды жүктөңүз.</small>
-      <div id="pdf-file-preview" class="mt-2" style="display:none;">
-        <h6>Арыздын алдын ала көрүүсү:</h6>
-        <iframe id="pdf-file-iframe" width="100%" height="300" style="border:1px solid #ccc;"></iframe>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <label for="{{ form.transcript_file.id_for_label }}">Транскрипт / Академиялык маалымкат (PDF)</label>
-      {{ form.transcript_file|add_class:"form-control" }}
-      <small class="form-text text-muted">PDF форматындагы транскрипт же маалымкат.</small>
-      <div id="transcript-preview" class="mt-2" style="display:none;">
-        <h6>Транскрипттин алдын ала көрүүсү:</h6>
-        <iframe id="transcript-iframe" width="100%" height="300" style="border:1px solid #ccc;"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <hr>
-
-  <!-- Адистик жана окуу планы -->
-  <h2>Адистик жана окуу планы</h2>
+  <h4>Кайсыл адистиктен которулуп жатат <span class="text-danger">*</span></h4>
   <div class="mb-3">
-    <label for="specialty-select">Адистикти тандаңыз:</label>
-    <select id="specialty-select" name="specialty" class="form-select" required>
+    <select id="specialty-source-select" name="source_specialty" class="form-select" required>
       <option value="">-- Адистикти тандаңыз --</option>
       {% for spec in specialty %}
-        <option value="{{ spec.id }}" {% if form.specialty.value == spec.id %}selected{% endif %}>{{ spec.name }}</option>
+        <option value="{{ spec.id }}" {% if form.source_specialty.value|stringformat:"s" == spec.id|stringformat:"s" %}selected{% endif %}>
+          {{ spec.name }}
+        </option>
       {% endfor %}
     </select>
-    {% if form.specialty.errors %}
-      <div class="text-danger">{{ form.specialty.errors }}</div>
+    {% if form.source_specialty.errors %}
+      <div class="text-danger mt-1">{{ form.source_specialty.errors }}</div>
     {% endif %}
   </div>
 
-  <div id="curriculum-preview" style="display:none;">
-    <iframe id="curriculum-iframe" width="100%" height="400" style="border:1px solid #ccc;"></iframe>
-  </div>
-
-  <hr>
-
-  <!-- Курс -->
   <h4>Приоритеттүү курс <span class="text-danger">*</span></h4>
   <div class="mb-3">
-    <select name="course" class="form-select" required>
+    <select id="priority-course-select" name="priority_course" class="form-select" required>
       <option value="">-- Курсту тандаңыз --</option>
       {% for course in courses %}
-        <option value="{{ course.id }}">{{ course.cours }}</option>
+        <option value="{{ course.id }}" {% if form.priority_course.value|stringformat:"s" == course.id|stringformat:"s" %}selected{% endif %}>
+          {{ course.cours }}
+        </option>
       {% endfor %}
     </select>
+    {% if form.priority_course.errors %}
+      <div class="text-danger mt-1">{{ form.priority_course.errors }}</div>
+    {% endif %}
   </div>
 
-  <hr>
+  <h2>Студенттин документтери</h2>
+  <div class="mb-4 p-4 border rounded bg-light">
+    <label for="{{ form.pdf_file.id_for_label }}" class="form-label fw-bold">
+      Студенттин арызы (PDF/скан) <span class="text-danger">*</span>
+    </label>
+    {{ form.pdf_file|add_class:"form-control form-control-lg" }}
+    <small class="form-text text-muted">PDF же скан түрүндө арызды жүктөңүз.</small>
 
-  <!-- Предметтер жана кредиттер -->
-  <h2>Предметтер жана кредиттер</h2>
-  <input type="text" id="subject-search" class="form-control mb-2" placeholder="Предметти издөө...">
+    <div id="pdf-file-preview" class="mt-4" style="display:none;">
+      <h6 class="fw-semibold">Арыздын алдын ала көрүүсү:</h6>
+      <iframe id="pdf-file-iframe" width="100%" height="500" style="border:2px solid #999; border-radius: 8px;"></iframe>
+    </div>
+  </div>
 
-  <div id="subject-credits">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="specialty-select" class="form-label">Адистикти тандаңыз:</label>
+      <select id="specialty-select" name="specialty" class="form-select" required>
+        <option value="">-- Адистикти тандаңыз --</option>
+        {% for spec in specialty %}
+          <option value="{{ spec.id }}" {% if form.specialty.value|stringformat:"s" == spec.id|stringformat:"s" %}selected{% endif %}>
+            {{ spec.name }}
+          </option>
+        {% endfor %}
+      </select>
+      {% if form.specialty.errors %}
+        <div class="text-danger mt-1">{{ form.specialty.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6">
+      <label for="{{ form.transcript_file.id_for_label }}" class="form-label">
+        Транскрипт / Академиялык маалымкат (PDF)
+      </label>
+      {{ form.transcript_file|add_class:"form-control" }}
+      <div class="form-text">PDF форматындагы транскрипт же маалымкат.</div>
+    </div>
+  </div>
+
+  <!-- PDF алдын ала көрүү -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h6 class="fw-bold mb-2">Студенттин арызы</h6>
+      <div id="pdf-file-preview" class="border rounded" style="display:none; overflow:hidden;">
+        <iframe id="pdf-file-iframe" width="100%" height="400" style="border:none;"></iframe>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <h6 class="fw-bold mb-2">Транскрипт / Академиялык маалымкат</h6>
+      <div id="transcript-preview" class="border rounded" style="display:none; overflow:hidden;">
+        <iframe id="transcript-iframe" width="100%" height="400" style="border:none;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Окуу планы -->
+  <div id="curriculum-preview" class="mb-4" style="display:none;">
+    <h6 class="fw-bold mb-2">Окуу планы (Curriculum)</h6>
+    <div class="border rounded">
+      <iframe id="curriculum-iframe" width="100%" height="400" style="border:none;"></iframe>
+    </div>
+  </div>
+
+  <!-- Таанылган предметтер -->
+  <h2>Таанылган предметтер</h2>
+  <input type="text" id="subject-search-recognized" class="form-control mb-2" placeholder="Предметти издөө...">
+
+  <div id="subject-credits-recognized">
     <div class="subject-credit d-flex gap-2 mb-2 align-items-center">
-      <select name="subjects[]" class="form-select w-75 subject-select">
+      <select name="recognized_subjects[]" class="form-select w-75 subject-select-recognized" required>
         {% for subject in subjects %}
           <option value="{{ subject.id }}">{{ subject.name }}</option>
         {% endfor %}
       </select>
-      <input type="number" name="credits[]" class="form-control w-25" placeholder="Кредиттер" step="0.5" min="0">
+      <input type="number" name="recognized_credits[]" class="form-control w-25" placeholder="Кредиттер" step="0.5" min="0" required>
       <button type="button" class="btn btn-danger btn-sm ms-2" onclick="removeSubjectCredit(this)">×</button>
     </div>
   </div>
-  <button type="button" class="btn btn-outline-secondary mb-4" onclick="addSubjectCredit()">+ Предметти кошуу</button>
+  <button type="button" class="btn btn-outline-secondary mb-4" onclick="addSubjectCredit('recognized')">+ Предметти кошуу</button>
 
   <hr>
 
-  <!-- Согласование -->
+  <!-- Предметтердин айырмачылыгы -->
+  <h2>Предметтердин айырмачылыгы</h2>
+  <input type="text" id="subject-search-difference" class="form-control mb-2" placeholder="Предметти издөө...">
+
+  <div id="subject-credits-difference">
+    <div class="subject-credit d-flex gap-2 mb-2 align-items-center">
+      <select name="difference_subjects[]" class="form-select w-75 subject-select-difference" required>
+        {% for subject in subjects %}
+          <option value="{{ subject.id }}">{{ subject.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="difference_credits[]" class="form-control w-25" placeholder="Кредиттер" step="0.5" min="0" required>
+      <button type="button" class="btn btn-danger btn-sm ms-2" onclick="removeSubjectCredit(this)">×</button>
+    </div>
+  </div>
+  <button type="button" class="btn btn-outline-secondary mb-4" onclick="addSubjectCredit('difference')">+ Предметти кошуу</button>
+
+  <hr>
+
+  <!-- Согласование этаптары -->
   <h2>Согласование маршруту</h2>
   <div id="approval-steps">
     <div class="approval-step d-flex gap-2 mb-2 align-items-center">
       <label class="col-form-label me-2">Пайдалануучуну тандаңыз:</label>
-      <select name="approvers[]" class="form-select flex-grow-1">
+      <select name="approvers[]" class="form-select flex-grow-1" required>
         {% for user in users %}
           <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
         {% endfor %}
@@ -125,37 +178,62 @@
   <button type="submit" class="btn btn-primary w-100">Жазууну сактоо</button>
 </form>
 
-<!-- Сценарийлер -->
+<!-- JavaScript -->
 <script>
-  // Издөө
-  document.getElementById('subject-search').addEventListener('input', function () {
-    const filter = this.value.toLowerCase();
-    document.querySelectorAll('.subject-select').forEach(select => {
-      [...select.options].forEach(option => {
-        option.style.display = option.text.toLowerCase().includes(filter) ? '' : 'none';
+  // Издөө функциясы жалпы, берилген класстарга негизделген
+  function setupSubjectSearch(inputId, selectClass) {
+    const input = document.getElementById(inputId);
+    input.addEventListener('input', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll(`select.${selectClass}`).forEach(select => {
+        [...select.options].forEach(option => {
+          option.style.display = option.text.toLowerCase().includes(filter) ? '' : 'none';
+        });
       });
     });
-  });
+  }
+
+  setupSubjectSearch('subject-search-recognized', 'subject-select-recognized');
+  setupSubjectSearch('subject-search-difference', 'subject-select-difference');
 
   // Предметтерди башкаруу
-  function addSubjectCredit() {
-    const container = document.getElementById('subject-credits');
+  function addSubjectCredit(type) {
+    let containerId = '';
+    let selectClass = '';
+    let nameSubjects = '';
+    let nameCredits = '';
+
+    if (type === 'recognized') {
+      containerId = 'subject-credits-recognized';
+      selectClass = 'subject-select-recognized';
+      nameSubjects = 'recognized_subjects[]';
+      nameCredits = 'recognized_credits[]';
+    } else if (type === 'difference') {
+      containerId = 'subject-credits-difference';
+      selectClass = 'subject-select-difference';
+      nameSubjects = 'difference_subjects[]';
+      nameCredits = 'difference_credits[]';
+    } else {
+      return;
+    }
+
+    const container = document.getElementById(containerId);
     const div = container.querySelector('.subject-credit').cloneNode(true);
     div.querySelector('select').value = "";
+    div.querySelector('select').name = nameSubjects;
     div.querySelector('input').value = "";
+    div.querySelector('input').name = nameCredits;
     container.appendChild(div);
   }
 
   function removeSubjectCredit(btn) {
-    const div = btn.closest('.subject-credit');
-    if (document.querySelectorAll('.subject-credit').length > 1) {
-      div.remove();
-    } else {
-      alert("Кеминде бир предмет болушу керек.");
+    const container = btn.closest('div[id^="subject-credits"]');
+    if (container.querySelectorAll('.subject-credit').length > 1) {
+      btn.closest('.subject-credit').remove();
     }
   }
 
-  // Согласование этаптары
+  // Согласование этаптерин башкаруу
   function addApprovalStep() {
     const container = document.getElementById('approval-steps');
     const step = container.querySelector('.approval-step').cloneNode(true);
@@ -164,74 +242,67 @@
   }
 
   function removeApprover(btn) {
-    const div = btn.closest('.approval-step');
-    if (document.querySelectorAll('.approval-step').length > 1) {
-      div.remove();
-    } else {
-      alert("Кеминде бир этап болушу керек.");
+    const container = document.getElementById('approval-steps');
+    if (container.querySelectorAll('.approval-step').length > 1) {
+      btn.closest('.approval-step').remove();
     }
   }
 
   function moveUp(btn) {
-    const div = btn.closest('.approval-step');
-    const prev = div.previousElementSibling;
-    if (prev) div.parentNode.insertBefore(div, prev);
+    const step = btn.closest('.approval-step');
+    if (step.previousElementSibling) {
+      step.parentNode.insertBefore(step, step.previousElementSibling);
+    }
   }
 
   function moveDown(btn) {
-    const div = btn.closest('.approval-step');
-    const next = div.nextElementSibling;
-    if (next) div.parentNode.insertBefore(next, div);
+    const step = btn.closest('.approval-step');
+    if (step.nextElementSibling) {
+      step.parentNode.insertBefore(step.nextElementSibling, step);
+    }
   }
 
   // PDF алдын ала көрүү
-  document.getElementById("id_pdf_file").addEventListener("change", function () {
-    const file = this.files[0];
-    const iframe = document.getElementById("pdf-file-iframe");
-    const preview = document.getElementById("pdf-file-preview");
-    if (file) {
-      iframe.src = URL.createObjectURL(file);
-      preview.style.display = "block";
+  function previewPDF(inputElement, iframeId, previewContainerId) {
+    const file = inputElement.files[0];
+    const previewContainer = document.getElementById(previewContainerId);
+    const iframe = document.getElementById(iframeId);
+
+    if (file && file.type === "application/pdf") {
+      const fileURL = URL.createObjectURL(file);
+      iframe.src = fileURL;
+      previewContainer.style.display = 'block';
     } else {
       iframe.src = "";
-      preview.style.display = "none";
+      previewContainer.style.display = 'none';
+    }
+  }
+
+  document.getElementById("{{ form.pdf_file.id_for_label }}").addEventListener('change', function () {
+    previewPDF(this, 'pdf-file-iframe', 'pdf-file-preview');
+  });
+
+  document.getElementById("{{ form.transcript_file.id_for_label }}").addEventListener('change', function () {
+    previewPDF(this, 'transcript-iframe', 'transcript-preview');
+  });
+
+  // Адистик тандаганда окуу планынын PDF файлдарын жүктөө (эгер керек болсо)
+  document.getElementById('specialty-select').addEventListener('change', function () {
+    const specialtyId = this.value;
+    const curriculumIframe = document.getElementById('curriculum-iframe');
+    const curriculumPreview = document.getElementById('curriculum-preview');
+
+    if (specialtyId) {
+      // URLди өз сервериңиздин API же viewге ылайык өзгөртүңүз
+      const pdfUrl = `/curriculums/pdf/${specialtyId}/`;
+      curriculumIframe.src = pdfUrl;
+      curriculumPreview.style.display = 'block';
+    } else {
+      curriculumIframe.src = '';
+      curriculumPreview.style.display = 'none';
     }
   });
 
-  document.getElementById("id_transcript_file").addEventListener("change", function () {
-    const file = this.files[0];
-    const iframe = document.getElementById("transcript-iframe");
-    const preview = document.getElementById("transcript-preview");
-    if (file) {
-      iframe.src = URL.createObjectURL(file);
-      preview.style.display = "block";
-    } else {
-      iframe.src = "";
-      preview.style.display = "none";
-    }
-  });
-
-  // Окуу планын жүктөө
-  document.getElementById("specialty-select").addEventListener("change", function () {
-    const selectedId = this.value;
-    const iframe = document.getElementById("curriculum-iframe");
-    const container = document.getElementById("curriculum-preview");
-    if (selectedId) {
-      fetch(`/get-curriculum/${selectedId}/`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.url) {
-            iframe.src = data.url;
-            container.style.display = "block";
-          } else {
-            iframe.src = "";
-            container.style.display = "none";
-          }
-        });
-    } else {
-      iframe.src = "";
-      container.style.display = "none";
-    }
-  });
 </script>
-{% endblock %}
+
+{% endblock content %}

@@ -1,39 +1,39 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
-from django.views import generic
-from django.contrib.auth.decorators import login_required
-from posts.models import Post, ApprovalStep, Specialty, Subject, PostSubject, Cours
-from posts.forms import PostForm, CommentForm, SpecialtyForm, SubjectForm
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import ListView
-from django.contrib import messages
-from .utils.pdf_generator import generate_post_pdf
-from datetime import datetime
-from django.http import JsonResponse
-from django.http import FileResponse, Http404
 import os
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.paginator import Paginator
+from django.http import FileResponse, Http404, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views import generic
+from django.views.generic import ListView
+
+from posts.forms import CommentForm, PostForm, SpecialtyForm, SubjectForm
+from posts.models import ApprovalStep, Cours, Post, PostSubject, Specialty, Subject
+from .utils.pdf_generator import generate_post_pdf
+
 
 def serve_pdf(request, filename):
-    # Полный путь к файлу
+    """
+    Отдаёт PDF файл из MEDIA_ROOT по имени.
+    """
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     if not os.path.exists(filepath):
         raise Http404("Файл табылган жок")
 
-    # Файлды FileResponse менен кайтаруу — браузер түздөн-түз ачат же жүктөп алат
     return FileResponse(open(filepath, 'rb'), content_type='application/pdf')
 
 
-
-
-
-
-
-
 def generate_unique_protocol_number():
+    """
+    Генерирует уникальный номер протокола в формате ГОД/XXX,
+    где XXX — порядковый номер в текущем году.
+    """
     year = datetime.now().year
     last_post = Post.objects.filter(protocol_number__startswith=str(year)).order_by('-id').first()
 
@@ -48,23 +48,31 @@ def generate_unique_protocol_number():
     return f"{year}/{last_number + 1:03}"
 
 
-class SuperuserPostListView(UserPassesTestMixin, ListView):
+class SuperuserPostListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Список всех постов для суперпользователей с возможностью поиска.
+    """
     model = Post
     template_name = 'posts/superuser_post_list.html'
     context_object_name = 'posts'
+    paginate_by = 20
 
     def test_func(self):
         return self.request.user.is_superuser
 
     def get_queryset(self):
-        queryset = Post.objects.all()
+        queryset = Post.objects.all().order_by('-created')
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(title__icontains=query)
         return queryset
 
 
-class PostCreateView(generic.CreateView):
+class PostCreateView(LoginRequiredMixin, generic.CreateView):
+    """
+    Создание нового поста с назначением этапов согласования,
+    связью с предметами и генерацией PDF протокола.
+    """
     model = Post
     form_class = PostForm
     template_name = 'posts/post_create.html'
@@ -78,17 +86,10 @@ class PostCreateView(generic.CreateView):
         return context
 
     def form_valid(self, form):
-        post = self._save_post(form)
-        self._create_approval_steps(post)
-        self._attach_subjects_with_credits(post)
-        generate_post_pdf(post)
-        return redirect('index-page')
-
-    def _save_post(self, form):
         post = form.save(commit=False)
         post.owner = self.request.user
 
-        course_id = self.request.POST.get('course')
+        course_id = self.request.POST.get('cours') or self.request.POST.get('course')
         if course_id:
             try:
                 course = Cours.objects.get(pk=course_id)
@@ -97,12 +98,10 @@ class PostCreateView(generic.CreateView):
                 pass
 
         post.protocol_number = generate_unique_protocol_number()
-
         post.save()
         form.save_m2m()
-        return post
 
-    def _create_approval_steps(self, post):
+        # Создаём этапы согласования
         approver_ids = self.request.POST.getlist('approvers[]')
         for order, user_id in enumerate(approver_ids, start=1):
             try:
@@ -111,10 +110,9 @@ class PostCreateView(generic.CreateView):
             except get_user_model().DoesNotExist:
                 continue
 
-    def _attach_subjects_with_credits(self, post):
+        # Связь с предметами и кредиты
         subject_ids = self.request.POST.getlist('subjects[]')
         credits = self.request.POST.getlist('credits[]')
-
         for subject_id, credit in zip(subject_ids, credits):
             if subject_id and credit:
                 try:
@@ -123,8 +121,20 @@ class PostCreateView(generic.CreateView):
                 except (Subject.DoesNotExist, ValueError):
                     continue
 
+        # Генерация PDF-протокола
+        try:
+            generate_post_pdf(post)
+        except Exception as e:
+            messages.warning(self.request, f"Ошибка при генерации PDF: {e}")
 
-class PostDetailView(generic.DetailView):
+        return redirect('index-page')
+
+
+class PostDetailView(LoginRequiredMixin, generic.DetailView):
+    """
+    Просмотр детальной информации по посту,
+    возможность согласования и добавления комментариев.
+    """
     model = Post
     template_name = 'posts/post_detail.html'
     context_object_name = 'post'
@@ -161,13 +171,18 @@ class PostDetailView(generic.DetailView):
         return redirect("post-detail", pk=post.pk)
 
     def handle_approval(self, request, post):
+        """
+        Обработка согласования текущего этапа.
+        """
         current_step = post.approval_steps.filter(is_approved=None).order_by("order").first()
         if current_step and current_step.user == request.user:
-            current_step.is_approved = 'approve' in request.POST
+            is_approved_str = request.POST.get('approve')
+            current_step.is_approved = True if is_approved_str == 'true' else False
             current_step.reviewed_at = timezone.now()
             current_step.save()
 
             if current_step.is_approved:
+                # Проверяем, остались ли ещё этапы на согласование
                 if not post.approval_steps.filter(is_approved=None).exists():
                     post.status = "published"
             else:
@@ -178,19 +193,26 @@ class PostDetailView(generic.DetailView):
         return redirect("post-detail", pk=post.pk)
 
     def handle_comment(self, request, post):
+        """
+        Обработка добавления комментария.
+        """
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.post = post
             comment.author = request.user.get_full_name() or request.user.email
             comment.save()
+            messages.success(request, "Комментарий успешно добавлен.")
         else:
             messages.error(request, "Ошибка при добавлении комментария. Пожалуйста, попробуйте снова.")
 
         return redirect("post-detail", pk=post.pk)
 
 
-class CreateSpecialtyView(generic.CreateView):
+class CreateSpecialtyView(LoginRequiredMixin, generic.CreateView):
+    """
+    Создание и просмотр списка специальностей с пагинацией и поиском.
+    """
     model = Specialty
     template_name = 'posts/specialty_create.html'
     form_class = SpecialtyForm
@@ -202,11 +224,17 @@ class CreateSpecialtyView(generic.CreateView):
         specialties = Specialty.objects.all()
         if query:
             specialties = specialties.filter(name__icontains=query)
-        context["specialties"] = specialties
+        paginator = Paginator(specialties, 20)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context["specialties"] = page_obj
         return context
 
 
-class CreateSubjectView(generic.CreateView):
+class CreateSubjectView(LoginRequiredMixin, generic.CreateView):
+    """
+    Создание и просмотр списка предметов с пагинацией и поиском.
+    """
     model = Subject
     template_name = 'posts/subject_create.html'
     form_class = SubjectForm
@@ -218,49 +246,68 @@ class CreateSubjectView(generic.CreateView):
         subjects = Subject.objects.all()
         if query:
             subjects = subjects.filter(name__icontains=query)
-        context["subjects"] = subjects
+        paginator = Paginator(subjects, 20)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context["subjects"] = page_obj
         return context
 
 
-class IndexView(generic.TemplateView):
+class IndexView(LoginRequiredMixin, generic.TemplateView):
+    """
+    Главная страница с личными постами пользователя и постами на согласовании.
+    """
     template_name = 'posts/index.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        if user.is_authenticated:
-            context['my_posts'] = Post.objects.filter(owner=user)
-            context['approval_posts'] = Post.objects.filter(
-                approval_steps__user=user,
-                approval_steps__is_approved=None
-            ).distinct()
-            context['approved_posts'] = Post.objects.filter(
-                approval_steps__user=user,
-                approval_steps__is_approved=True
-            ).distinct()
+        context['my_posts'] = Post.objects.filter(owner=user)
+        context['approval_posts'] = Post.objects.filter(
+            approval_steps__user=user,
+            approval_steps__is_approved=None
+        ).distinct()
+        context['approved_posts'] = Post.objects.filter(
+            approval_steps__user=user,
+            approval_steps__is_approved=True
+        ).distinct()
 
         return context
 
 
-class PostUpdateView(generic.UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+    """
+    Обновление поста (доступно владельцу или суперпользователю).
+    """
     model = Post
     template_name = 'posts/post_update.html'
     form_class = PostForm
     success_url = reverse_lazy("index-page")
 
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.owner or self.request.user.is_superuser
+
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+    """
+    Удаление поста (доступно владельцу или суперпользователю).
+    """
+    model = Post
+    template_name = "posts/post_confirm_delete.html"
+    success_url = reverse_lazy("index-page")
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.owner or self.request.user.is_superuser
+    
 
 class AboutView(generic.TemplateView):
-    template_name = "posts/about.html"
+    template_name="posts/about.html"
     extra_context = {
         "title": "Страница о нас"
     }
-
-
-class PostDeleteView(generic.DeleteView):
-    model = Post
-    success_url = reverse_lazy("admin-posts")
-
 
 def get_curriculum_file(request, pk):
     try:

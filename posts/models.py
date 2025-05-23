@@ -1,12 +1,6 @@
-# models.py
-
 from django.db import models
 from django.conf import settings
-import uuid
 from django.utils import timezone
-from django.db import models
-from django.conf import settings
-
 
 class Cours(models.Model):
     cours = models.CharField(verbose_name="Курс студента")
@@ -20,7 +14,6 @@ class Specialty(models.Model):
     short_name = models.CharField(max_length=20, verbose_name="Укороченная название")
     code = models.CharField(max_length=20, verbose_name="Код специальности")
 
-    
     curriculum_file = models.FileField(
         upload_to='curriculums/',
         null=True,
@@ -30,6 +23,7 @@ class Specialty(models.Model):
 
     def __str__(self):
         return f"{self.code} – {self.name}"
+
 
 class Post(models.Model):
     cours = models.ForeignKey(Cours, on_delete=models.SET_NULL, null=True, blank=True)
@@ -107,6 +101,7 @@ class Post(models.Model):
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
 
+
 class ApprovalStep(models.Model):
     post = models.ForeignKey(Post, related_name='approval_steps', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -117,10 +112,11 @@ class ApprovalStep(models.Model):
     def __str__(self):
         return f"{self.user.get_full_name()} - Этап {self.order}"
 
-    
 
 class Subject(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    credit = models.FloatField(default=0, verbose_name="Кредит")
+    specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Специальность")
 
     def __str__(self):
         return self.name
@@ -129,7 +125,11 @@ class Subject(models.Model):
 class PostSubject(models.Model):
     post = models.ForeignKey(Post, related_name='post_subjects', on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    credits = models.FloatField()  # деканат вводит вручную
+    earned_credits = models.FloatField(default=0, verbose_name="Полученные кредиты")  # Студент алган кредит
+
+    def __str__(self):
+        return f"{self.post} - {self.subject}"
+
 
 class Comment(models.Model):
     text = models.TextField()
@@ -139,4 +139,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
-

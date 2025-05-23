@@ -42,3 +42,21 @@ class SpecialtyForm(forms.ModelForm):
     class Meta:
         model = Specialty
         fields = ['name', 'short_name', 'code', 'curriculum_file']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Адистиктин толук аты'
+            }),
+            'short_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Кыскача аты'
+            }),
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Адистик коду'
+            }),
+            'curriculum_file': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'application/pdf'
+            }),
+        }
