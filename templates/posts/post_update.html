@@ -2,9 +2,15 @@
 {% block content %}
     <h1>Страница post_update</h1>
 
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
+
+        {{ formset.management_form }}
+        {% for form in formset %}
+            {{ form.as_p }}
+        {% endfor %}
+
         <button type="submit">Обновить запись</button>
     </form>
 

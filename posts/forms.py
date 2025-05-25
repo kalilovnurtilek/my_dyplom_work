@@ -2,7 +2,7 @@ from django import forms
 from posts.models import Post, Comment, Specialty, Subject, Cours, PostSubject
 from django.forms import inlineformset_factory
 
-class SubjectForm(forms.ModelForm):
+class PostSubjectForm(forms.ModelForm):
     class Meta:
         model = PostSubject
         fields = ['subject', 'earned_credits']
@@ -13,11 +13,10 @@ class SubjectForm(forms.ModelForm):
             }),
         }
 
-# Формсет для PostSubject
 PostSubjectFormSet = inlineformset_factory(
     Post,
     PostSubject,
-    form=SubjectForm,
+    form=PostSubjectForm,
     extra=1,
     can_delete=True
 )
@@ -48,7 +47,7 @@ class PostForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Настройка queryset для subjects в зависимости от выбранной specialty
+        # Динамика для subjects в зависимости от specialty (для фронтенда)
         if 'specialty' in self.data:
             try:
                 spec_id = int(self.data.get('specialty'))
@@ -65,9 +64,8 @@ class PostForm(forms.ModelForm):
         if commit:
             post.save()
             selected_subjects = self.cleaned_data.get('subjects') or []
-            # Сбрасываем старые связи
+            # Постобработка: сброс и пересоздание PostSubject записей
             PostSubject.objects.filter(post=post).delete()
-            # Создаем новые
             for subj in selected_subjects:
                 PostSubject.objects.create(post=post, subject=subj, earned_credits=0)
         return post

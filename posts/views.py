@@ -1,21 +1,20 @@
 import os
 from datetime import datetime
-
+from django.views import View
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import generic
-from django.views.generic import ListView
 
-from posts.forms import CommentForm, PostForm, SpecialtyForm, SubjectForm
-from posts.models import ApprovalStep, Cours, Post, PostSubject, Specialty, Subject
+from posts.forms import PostForm, PostSubjectForm, CommentForm, SpecialtyForm,PostSubjectFormSet
+from posts.models import Post, PostSubject, Subject, Specialty, ApprovalStep, Cours
 from .utils.pdf_generator import generate_post_pdf
 
 
@@ -39,7 +38,7 @@ def generate_unique_protocol_number():
     return f"{year}/{last_number + 1:03}"
 
 
-class SuperuserPostListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class SuperuserPostListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
     model = Post
     template_name = 'posts/superuser_post_list.html'
     context_object_name = 'posts'
@@ -55,60 +54,79 @@ class SuperuserPostListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             queryset = queryset.filter(title__icontains=query)
         return queryset
 
-
-class PostCreateView(LoginRequiredMixin, generic.CreateView):
-    model = Post
-    form_class = PostForm
+class PostCreateView(LoginRequiredMixin, View):
     template_name = 'posts/post_create.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['users'] = get_user_model().objects.all()
-        context['subjects'] = Subject.objects.all()
-        context['courses'] = Cours.objects.all()
-        context['specialty'] = Specialty.objects.all()
-        return context
+    def get(self, request, *args, **kwargs):
+        form = PostForm()
+        context = {
+            'form': form,
+            'users': get_user_model().objects.all(),
+            'courses': Cours.objects.all(),
+            'specialties': Specialty.objects.all(),
+            'subjects': Subject.objects.all(),
+        }
+        return render(request, self.template_name, context)
 
-    def form_valid(self, form):
-        post = form.save(commit=False)
-        post.owner = self.request.user
+    def post(self, request, *args, **kwargs):
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Сохраняем сам Post
+            post = form.save(commit=False)
+            post.owner = request.user
+            post.protocol_number = generate_unique_protocol_number()
+            post.save()
 
-        course_id = self.request.POST.get('cours') or self.request.POST.get('course')
-        if course_id:
-            try:
-                course = Cours.objects.get(pk=course_id)
-                post.cours = course
-            except Cours.DoesNotExist:
-                pass
+            # Таанылган предметтер
+            for sid, cred in zip(
+                request.POST.getlist('recognized_subjects[]'),
+                request.POST.getlist('recognized_credits[]')
+            ):
+                if sid and cred:
+                    PostSubject.objects.create(
+                        post=post,
+                        subject_id=sid,
+                        earned_credits=float(cred)
+                    )
 
-        post.protocol_number = generate_unique_protocol_number()
-        post.save()
-        form.save_m2m()
+            # Айырмачылык предметтер
+            for sid, cred in zip(
+                request.POST.getlist('difference_subjects[]'),
+                request.POST.getlist('difference_credits[]')
+            ):
+                if sid and cred:
+                    PostSubject.objects.create(
+                        post=post,
+                        subject_id=sid,
+                        earned_credits=float(cred)
+                    )
 
-        approver_ids = self.request.POST.getlist('approvers[]')
-        for order, user_id in enumerate(approver_ids, start=1):
-            try:
-                user = get_user_model().objects.get(pk=user_id)
-                ApprovalStep.objects.create(post=post, user=user, order=order)
-            except get_user_model().DoesNotExist:
-                continue
-
-        subject_ids = self.request.POST.getlist('subjects[]')
-        credits = self.request.POST.getlist('credits[]')
-        for subject_id, credit in zip(subject_ids, credits):
-            if subject_id and credit:
+            # Approval steps
+            for order, uid in enumerate(request.POST.getlist('approvers[]'), start=1):
                 try:
-                    subject = Subject.objects.get(pk=subject_id)
-                    PostSubject.objects.create(post=post, subject=subject, credits=float(credit))
-                except (Subject.DoesNotExist, ValueError):
+                    user = get_user_model().objects.get(pk=uid)
+                    ApprovalStep.objects.create(post=post, user=user, order=order)
+                except get_user_model().DoesNotExist:
                     continue
 
-        try:
-            generate_post_pdf(post)
-        except Exception as e:
-            messages.warning(self.request, f"Ошибка при генерации PDF: {e}")
+            # Генерация PDF
+            try:
+                generate_post_pdf(post)
+            except Exception as e:
+                messages.warning(request, f"Ошибка при генерации PDF: {e}")
 
-        return redirect('index-page')
+            messages.success(request, "Пост успешно создан.")
+            return redirect('index-page')
+
+        # Если форма невалидна — возвращаем тот же шаблон с ошибками
+        context = {
+            'form': form,
+            'users': get_user_model().objects.all(),
+            'courses': Cours.objects.all(),
+            'specialties': Specialty.objects.all(),
+            'subjects': Subject.objects.all(),
+        }
+        return render(request, self.template_name, context)
 
 
 class PostDetailView(LoginRequiredMixin, generic.DetailView):
@@ -189,7 +207,7 @@ class CreateSpecialtyView(LoginRequiredMixin, generic.CreateView):
 class CreateSubjectView(LoginRequiredMixin, generic.CreateView):
     model = Subject
     template_name = 'posts/subject_create.html'
-    form_class = SubjectForm
+    form_class = PostSubjectForm
     success_url = reverse_lazy("create-subject")
 
     def get_context_data(self, **kwargs):
@@ -222,17 +240,54 @@ class IndexView(LoginRequiredMixin, generic.TemplateView):
         return context
 
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
-    model = Post
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.View):
     template_name = 'posts/post_update.html'
-    form_class = PostForm
-    success_url = reverse_lazy("index-page")
 
     def test_func(self):
-        post = self.get_object()
+        post = self.get_post()
         return self.request.user == post.owner or self.request.user.is_superuser
 
+    def get_post(self):
+        return get_object_or_404(Post, pk=self.kwargs['pk'])
 
+    def get(self, request, *args, **kwargs):
+        post = self.get_post()
+        post_form = PostForm(instance=post)
+        postsubject_formset = PostSubjectFormSet(instance=post)
+        context = {
+            'form': post_form,
+            'formset': postsubject_formset,
+            'post': post,
+            'users': get_user_model().objects.all(),
+            'courses': Cours.objects.all(),
+            'specialties': Specialty.objects.all(),
+            'subjects': Subject.objects.all(),
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        post = self.get_post()
+        post_form = PostForm(request.POST, request.FILES, instance=post)
+        postsubject_formset = PostSubjectFormSet(request.POST, instance=post)
+
+        if post_form.is_valid() and postsubject_formset.is_valid():
+            post = post_form.save()
+            postsubject_formset.save()
+            messages.success(request, "Пост успешно обновлен.")
+            return redirect('post-detail', pk=post.pk)
+
+        context = {
+            'form': post_form,
+            'formset': postsubject_formset,
+            'post': post,
+            'users': get_user_model().objects.all(),
+            'courses': Cours.objects.all(),
+            'specialties': Specialty.objects.all(),
+            'subjects': Subject.objects.all(),
+        }
+        return render(request, self.template_name, context)
+    
+    
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
     model = Post
     template_name = "posts/post_confirm_delete.html"
@@ -253,8 +308,8 @@ class AboutView(generic.TemplateView):
 @login_required
 def get_curriculum_file(request, pk):
     specialty = get_object_or_404(Specialty, pk=pk)
-    if specialty.curriculum:
-        file_path = specialty.curriculum.path
+    if specialty.curriculum_file:
+        file_path = specialty.curriculum_file.path
         if os.path.exists(file_path):
             return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
         else:

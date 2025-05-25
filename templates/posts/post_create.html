@@ -30,7 +30,7 @@
   <div class="mb-3">
     <select id="specialty-source-select" name="source_specialty" class="form-select" required>
       <option value="">-- Адистикти тандаңыз --</option>
-      {% for spec in specialty %}
+      {% for spec in specialties %}
         <option value="{{ spec.id }}" {% if form.source_specialty.value|stringformat:"s" == spec.id|stringformat:"s" %}selected{% endif %}>
           {{ spec.name }}
         </option>
@@ -75,7 +75,7 @@
       <label for="specialty-select" class="form-label">Адистикти тандаңыз:</label>
       <select id="specialty-select" name="specialty" class="form-select" required>
         <option value="">-- Адистикти тандаңыз --</option>
-        {% for spec in specialty %}
+        {% for spec in specialties %}
           <option value="{{ spec.id }}" {% if form.specialty.value|stringformat:"s" == spec.id|stringformat:"s" %}selected{% endif %}>
             {{ spec.name }}
           </option>
