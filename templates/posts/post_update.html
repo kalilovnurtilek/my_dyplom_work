@@ -1,11 +1,216 @@
 {% extends 'base.html' %}
+
 {% block content %}
-    <h1>Страница post_update</h1>
+<style>
+    .update-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .update-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .update-title {
+        font-size: 1.8rem;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #4a5568;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .file-upload {
+        margin-top: 0.5rem;
+    }
+    
+    .file-upload-label {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-label:hover {
+        background: #cbd5e0;
+    }
+    
+    .current-file {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #718096;
+    }
+    
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
 
-    <form action="" method="post">
+<div class="update-container">
+    <div class="update-header">
+        <h1 class="update-title">Редактирование записи</h1>
+        <p>Измените необходимые поля и сохраните изменения</p>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Обновить запись</button>
+        
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">Заголовок</label>
+            <input type="text" name="{{ form.title.name }}" 
+                   id="{{ form.title.id_for_label }}" 
+                   class="form-control" 
+                   value="{{ form.title.value|default:'' }}" required>
+            {% if form.title.errors %}
+                <div class="error-message">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.content.id_for_label }}">Содержимое</label>
+            <textarea name="{{ form.content.name }}" 
+                      id="{{ form.content.id_for_label }}" 
+                      class="form-control" 
+                      required>{{ form.content.value|default:'' }}</textarea>
+            {% if form.content.errors %}
+                <div class="error-message">{{ form.content.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">Статус</label>
+            <select name="{{ form.status.name }}" 
+                    id="{{ form.status.id_for_label }}" 
+                    class="form-control">
+                {% for value, label in form.status.field.choices %}
+                    <option value="{{ value }}" 
+                            {% if form.status.value == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.specialty.id_for_label }}">Специальность</label>
+            <select name="{{ form.specialty.name }}" 
+                    id="{{ form.specialty.id_for_label }}" 
+                    class="form-control">
+                {% for value, label in form.specialty.field.choices %}
+                    <option value="{{ value }}" 
+                            {% if form.specialty.value == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.specialty.errors %}
+                <div class="error-message">{{ form.specialty.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label>PDF файл</label>
+            <div class="file-upload">
+                <label for="{{ form.pdf_file.id_for_label }}" class="file-upload-label">
+                    <i class="fas fa-file-upload"></i> Выберите файл
+                </label>
+                <input type="file" name="{{ form.pdf_file.name }}" 
+                       id="{{ form.pdf_file.id_for_label }}" 
+                       class="form-control" 
+                       style="display: none;">
+                {% if form.pdf_file.value %}
+                    <div class="current-file">
+                        Текущий файл: <a href="{{ form.pdf_file.value.url }}" target="_blank">{{ form.pdf_file.value }}</a>
+                    </div>
+                {% endif %}
+            </div>
+            {% if form.pdf_file.errors %}
+                <div class="error-message">{{ form.pdf_file.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Сохранить изменения
+            </button>
+            <a href="{% url 'post-detail' post.id %}" class="btn" style="margin-left: 1rem;">
+                <i class="fas fa-times"></i> Отмена
+            </a>
+        </div>
     </form>
+</div>
 
+<script>
+    // Показываем имя выбранного файла
+    document.getElementById('{{ form.pdf_file.id_for_label }}').addEventListener('change', function(e) {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+            const fileLabel = this.previousElementSibling;
+            fileLabel.innerHTML = `<i class="fas fa-file-upload"></i> ${fileName}`;
+            
+            // Удаляем информацию о текущем файле, если она есть
+            const currentFileDiv = this.nextElementSibling;
+            if (currentFileDiv && currentFileDiv.classList.contains('current-file')) {
+                currentFileDiv.remove();
+            }
+        }
+    });
+</script>
 {% endblock %}

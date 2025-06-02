@@ -1,123 +1,427 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-  <h1>{{ post.title }}</h1>
-  <p><strong>Автор:</strong> {{ post.owner.get_full_name }}</p>
-  <p>{{ post.content }}</p>
+<style>
+    .post-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .post-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .post-title {
+        font-size: 2rem;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .post-meta {
+        color: #718096;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    
+    .post-content {
+        line-height: 1.7;
+        font-size: 1.1rem;
+        color: #4a5568;
+        margin-bottom: 2rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-draft {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .status-published {
+        background-color: #c6f6d5;
+        color: #276749;
+    }
+    
+    .status-not-started {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .status-in-progress {
+        background-color: #bee3f8;
+        color: #2b6cb0;
+    }
+    
+    .status-approved {
+        background-color: #c6f6d5;
+        color: #276749;
+    }
+    
+    .status-rejected {
+        background-color: #fed7d7;
+        color: #9b2c2c;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        margin: 2rem 0 1rem;
+        color: #2d3748;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .approval-steps {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .approval-step {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+    
+    .approval-step-number {
+        background: #e2e8f0;
+        color: #4a5568;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .approval-step-info {
+        flex: 1;
+    }
+    
+    .approval-step-status {
+        margin-left: 1rem;
+        font-size: 1.25rem;
+    }
+    
+    .approval-form {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        color: white;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #cbd5e0;
+        color: #4a5568;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .document-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 1.5rem 0;
+    }
+    
+    .subjects-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .subject-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #edf2f7;
+    }
+    
+    .comments-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .comment-item {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+    
+    .comment-author {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .comment-date {
+        font-size: 0.8rem;
+        color: #718096;
+    }
+    
+    .comment-form textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        min-height: 120px;
+        margin-bottom: 1rem;
+    }
+    
+    .divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 2rem 0;
+    }
+</style>
 
-  {% if post.pdf_file %}
-    <h3>Загруженный PDF:</h3>
-    <a href="{{ post.pdf_file.url }}" target="_blank">Скачать PDF</a>
-  {% endif %}
-
-  <p><strong>Статус:</strong> 
-    {% if post.status == 'draft' %} Черновик 
-    {% elif post.status == 'published' %} ✅ Опубликован 
-    {% endif %}
-  </p>
-  
-  <p><strong>Статус согласования:</strong> 
-    {% if post.status_approval == 'not_started' %} Ожидает начала
-    {% elif post.status_approval == 'in_progress' %} В процессе согласования
-    {% elif post.status_approval == 'approved' %} ✅ Одобрено
-    {% elif post.status_approval == 'rejected' %} ❌ Отклонено
-    {% endif %}
-  </p>
-
-  {% if post.current_approver %}
-    <p><strong>Текущий согласующий:</strong> {{ post.current_approver.get_full_name }}</p>
-  {% else %}
-    <p><strong>Согласование завершено</strong></p>
-  {% endif %}
-
-  <hr>
-
-  <h4>Маршрут согласования:</h4>
-  <ul>
-    {% for step in approval_steps %}
-      <li>
-        {{ step.order }}. {{ step.user.get_full_name|default:step.user.email }} — 
-        {% if step.is_approved == True %}
-          ✅ Согласовано ({{ step.reviewed_at|date:"d.m.Y H:i" }})
-        {% elif step.is_approved == False %}
-          ❌ Отклонено ({{ step.reviewed_at|date:"d.m.Y H:i" }})
-        {% else %}
-          ⏳ Ожидает
+<div class="post-container">
+    <div class="post-header">
+        <h1 class="post-title">{{ post.title|default:"Без названия" }}</h1>
+        <div class="post-meta">
+            <span><i class="fas fa-user"></i> Автор: 
+                {% if post.owner.get_full_name %}
+                    {{ post.owner.get_full_name }}
+                {% else %}
+                    {{ post.owner.email|default:"Неизвестный автор" }}
+                {% endif %}
+            </span>
+            <span><i class="fas fa-calendar"></i> Создано: {{ post.created|date:"d.m.Y H:i" }}</span>
+        </div>
+        
+        <div class="post-meta">
+            <span>
+                <i class="fas fa-tag"></i> Статус: 
+                <span class="status-badge {% if post.status == 'draft' %}status-draft{% else %}status-published{% endif %}">
+                    {% if post.status == 'draft' %}Черновик{% else %}Опубликован{% endif %}
+                </span>
+            </span>
+            <span>
+                <i class="fas fa-check-circle"></i> Согласование: 
+                <span class="status-badge 
+                    {% if post.status_approval == 'not_started' %}status-not-started
+                    {% elif post.status_approval == 'in_progress' %}status-in-progress
+                    {% elif post.status_approval == 'approved' %}status-approved
+                    {% elif post.status_approval == 'rejected' %}status-rejected{% endif %}">
+                    {% if post.status_approval == 'not_started' %}Ожидает начала
+                    {% elif post.status_approval == 'in_progress' %}В процессе
+                    {% elif post.status_approval == 'approved' %}Одобрено
+                    {% elif post.status_approval == 'rejected' %}Отклонено{% endif %}
+                </span>
+            </span>
+            {% if post.current_approver %}
+                <span>
+                    <i class="fas fa-user-check"></i> Текущий согласующий: 
+                    {% if post.current_approver.get_full_name %}
+                        {{ post.current_approver.get_full_name }}
+                    {% else %}
+                        {{ post.current_approver.email }}
+                    {% endif %}
+                </span>
+            {% else %}
+                <span><i class="fas fa-check-double"></i> Согласование завершено</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="post-content">
+        {{ post.content|linebreaks }}
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h4 class="section-title"><i class="fas fa-file-alt"></i> Документы</h4>
+    <div class="document-buttons">
+        {% if post.pdf_file %}
+            <a href="{{ post.pdf_file.url }}" class="btn btn-outline" target="_blank">
+                <i class="fas fa-file-pdf"></i> Скачать заявление
+            </a>
         {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-
-  {% if can_approve %}
-    <hr>
-    <h4>Вы должны согласовать этот пост:</h4>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="approval">
-      <button type="submit" name="approve" class="btn btn-success">Согласовать</button>
-      <button type="submit" name="reject" class="btn btn-danger">Отклонить</button>
-    </form>
-  {% endif %}
-
-  <hr>
-
-  <!-- Добавление списка предметов -->
-  <h4>Предметы и кредиты:</h4>
-  <ul>
-    {% for post_subject in post.post_subjects.all %}
-      <li>
-        {{ post_subject.subject.name }} - {{ post_subject.credits }} кредиты
-      </li>
-      {% empty %}
-      <li>Нет предметов для этого поста.</li>
-      {% endfor %}
+        
+        <a href="/media/protocols/post_{{ post.id }}_protocol.pdf" class="btn btn-outline" target="_blank">
+            <i class="fas fa-file-contract"></i> Скачать протокол
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h4 class="section-title"><i class="fas fa-list-ul"></i> Предметы и кредиты</h4>
+    <ul class="subjects-list">
+        {% for post_subject in post.post_subjects.all %}
+            <li class="subject-item">
+                <span>{{ post_subject.subject.name }}</span>
+                <span>{{ post_subject.credits }} кредитов</span>
+            </li>
+        {% empty %}
+            <li>Нет предметов для этого поста.</li>
+        {% endfor %}
     </ul>
-    {% if post.pdf_file %}
-        <a href="{{ post.pdf_file.url }}" class="btn btn-outline-primary mt-3">Скачать заявление</a>
+    
+    <div class="divider"></div>
+    
+    <h4 class="section-title"><i class="fas fa-project-diagram"></i> Маршрут согласования</h4>
+    <ul class="approval-steps">
+        {% for step in approval_steps %}
+            <li class="approval-step">
+                <div class="approval-step-number">{{ step.order }}</div>
+                <div class="approval-step-info">
+                    {% if step.user.get_full_name %}
+                        {{ step.user.get_full_name }}
+                    {% else %}
+                        {{ step.user.email }}
+                    {% endif %}
+                    {% if step.reviewed_at %}
+                        <div class="comment-date">
+                            {{ step.reviewed_at|date:"d.m.Y H:i" }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="approval-step-status">
+                    {% if step.is_approved == True %}
+                        ✅
+                    {% elif step.is_approved == False %}
+                        ❌
+                    {% else %}
+                        ⏳
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    {% if can_approve %}
+        <div class="approval-form">
+            <h5><i class="fas fa-check-circle"></i> Ваше решение по согласованию</h5>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approval">
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="submit" name="approve" class="btn btn-success">
+                        <i class="fas fa-check"></i> Согласовать
+                    </button>
+                    <button type="submit" name="reject" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Отклонить
+                    </button>
+                </div>
+            </form>
+        </div>
     {% endif %}
     
-    <a href="/media/protocols/post_{{ post.id }}_protocol.pdf" class="btn btn-outline-success mt-3" target="_blank">
-        Скачать протокол
-    </a>
-
-  <hr>
-  <h4>Комментарии:</h4>
-  <ul>
-    {% for comment in comments %}
-      <li><strong>{{ comment.author }}</strong>: {{ comment.text }} <br>
-          <small>{{ comment.created|date:"d.m.Y H:i" }}</small>
-      </li>
-    {% empty %}
-      <li>Комментариев пока нет.</li>
-    {% endfor %}
-  </ul>
-
-  {% if user.is_superuser %}
-  <br>
-  <form action="{% url 'post-delete' post.id %}" method="get">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Удалить пост</button>
-  </form>
-
-  <br>
-  <a href="{% url 'post-update' post.id %}" class="btn btn-secondary">Обновить запись</a>
-  <br>
-  {% endif %}
-
-  {% if user.is_authenticated %}
-    <hr>
-    <h4>Добавить комментарий:</h4>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="comment">
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Отправить</button>
-    </form>
-  {% else %}
-    <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
-  {% endif %}
+    <div class="divider"></div>
+    
+    <h4 class="section-title"><i class="fas fa-comments"></i> Комментарии</h4>
+    <ul class="comments-list">
+        {% for comment in comments %}
+            <li class="comment-item">
+                <div class="comment-author">
+                    {% if comment.author.get_full_name %}
+                        {{ comment.author.get_full_name }}
+                    {% else %}
+                        {{ comment.author.email }}
+                    {% endif %}
+                </div>
+                <div class="comment-date">{{ comment.created|date:"d.m.Y H:i" }}</div>
+                <p>{{ comment.text }}</p>
+            </li>
+        {% empty %}
+            <li>Комментариев пока нет.</li>
+        {% endfor %}
+    </ul>
+    
+    {% if user.is_authenticated %}
+        <form method="post" class="comment-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="comment">
+            <h5>Добавить комментарий</h5>
+            <textarea name="text" required placeholder="Ваш комментарий..."></textarea>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Отправить
+            </button>
+        </form>
+    {% else %}
+        <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
+    {% endif %}
+    
+    {% if user.is_superuser %}
+        <div class="divider"></div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'post-update' post.id %}" class="btn btn-secondary">
+                <i class="fas fa-edit"></i> Редактировать
+            </a>
+            <form action="{% url 'post-delete' post.id %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот пост?')">
+                    <i class="fas fa-trash"></i> Удалить пост
+                </button>
+            </form>
+        </div>
+    {% endif %}
 </div>
 
-
+<script>
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            btn.style.transform = 'translateY(-2px)';
+            btn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = '';
+            btn.style.boxShadow = '';
+        });
+    });
+</script>
 {% endblock %}

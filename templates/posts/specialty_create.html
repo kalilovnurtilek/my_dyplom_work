@@ -1,27 +1,123 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Можно добавить специальность</h1>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">Добавить специальность</h2>
+                </div>
+                <div class="card-body">
+                    <form action="" method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        
+                        <button type="submit" class="btn btn-primary">Добавить специальность</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h2 class="h5 mb-0">Список специальностей</h2>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-3">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" placeholder="Поиск по названию или коду..." value="{{ request.GET.q }}">
+                            <button type="submit" class="btn btn-outline-primary">Искать</button>
+                            {% if request.GET.q %}
+                                <a href="?" class="btn btn-outline-danger">Сброс</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                    
+                    {% if specialties %}
+                    <div class="list-group">
+                        {% for specialty in specialties %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ specialty.name }}</strong>
+                                <small class="text-muted d-block">Код: {{ specialty.code }}</small>
+                            </div>
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-sm btn-outline-primary">Изменить</a>
+                                <a href="#" class="btn btn-sm btn-outline-danger">Удалить</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">Специальности не найдены</div>
+                    {% endif %}
+                    
+                    {% if is_paginated %}
+                    <nav class="mt-3">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Назад</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Вперед</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Добавить специальность</button>
-    </form>
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
 
-    <h4>Существующие специальности</h4>
-    <form method="get">
-        <input type="text" name="q" placeholder="Поиск..." value="{{ request.GET.q }}">
-        <button type="submit">Искать</button>
-    </form>
-    
-    <ul>
-        {% for specialty in specialties %}
-            <li>{{ specialty.name }} ({{ specialty.code }})</li>
-        {% empty %}
-            <li>Ничего не найдено.</li>
-        {% endfor %}
-    </ul>
-
-
+<script>
+// Валидация форм
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
 {% endblock %}

@@ -1,36 +1,191 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+    }
+    
+    .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    
+    .auth-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .auth-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+    
+    .auth-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .auth-subtitle {
+        margin: 8px 0 0;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    
+    .auth-body {
+        padding: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-primary {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+    
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+    
+    .auth-footer {
+        text-align: center;
+        padding: 0 30px 30px;
+        font-size: 14px;
+    }
+    
+    .auth-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .auth-link:hover {
+        text-decoration: underline;
+    }
+    
+    .message {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .message-error {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border-left: 4px solid #dc2626;
+    }
+    
+    .message-info {
+        background-color: #dbeafe;
+        color: #2563eb;
+        border-left: 4px solid #2563eb;
+    }
+    
+    .field-error {
+        color: #dc2626;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+</style>
 
-{% if form.errors %}
-    <p>Ваши логин и пароль не совпадают, попробуйте ещё раз</p>
-{% endif %}
-
-{% if next %}
-    {% if user.is_authenticated %}
-        <p>У вашего аккаунта нет доступа к этой странице . Чтобы продолжить, пожалуйста войдите с учетной записью, которая имеет доступ</p>
-    {% else %}
-    <p>Пожалуйста войдите, чтобы увидеть эту страницу </p>
-    {% endif %}
-{% endif %}
-
-
-<form action="{% url 'login' %}" method="post">
-{% csrf_token %}
-
-<table>
-    <tr>
-        <td>{{ form.username.label_teg }}</td>
-        <td>{{ form.username }}</td>
-    </tr>
-    <tr>
-        <td>{{ form.password.label_teg }}</td>
-        <td>{{ form.password }}</td>
-    </tr>
-</table>
-    <input type="submit" value="Войти">
-    <input type="hidden" name="next" value="{{ next }}">
-</form>
-
-<p><a href="{% url 'password_reset' %}">Забыли пароль?</a></p>
-
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Добро пожаловать!</h1>
+            <p class="auth-subtitle">Войдите в свой аккаунт</p>
+        </div>
+        
+        <div class="auth-body">
+            {% if form.errors %}
+                <div class="message message-error">
+                    <p>Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.</p>
+                </div>
+            {% endif %}
+            
+            {% if next %}
+                {% if user.is_authenticated %}
+                    <div class="message message-info">
+                        <p>У вас нет доступа к этой странице. Требуется учетная запись с соответствующими правами.</p>
+                    </div>
+                {% else %}
+                    <div class="message message-info">
+                        <p>Пожалуйста, войдите для доступа к этой странице.</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_username">Имя пользователя</label>
+                    <input type="text" name="username" id="id_username" class="form-control" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password">Пароль</label>
+                    <input type="password" name="password" id="id_password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Войти</button>
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
+        </div>
+        
+        <div class="auth-footer">
+            <p>
+                <a href="{% url 'password_reset' %}" class="auth-link">Забыли пароль?</a>
+                &nbsp;|&nbsp;
+                <a href="#" class="auth-link">Регистрация</a>
+            </p>
+        </div>
+    </div>
+</div>
 {% endblock %}

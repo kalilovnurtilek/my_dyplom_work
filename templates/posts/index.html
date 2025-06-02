@@ -1,150 +1,327 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-  {% if user.is_superuser %}
-    <h1>Вы админ</h1>
-  {% else %}
-    <h1>Это главная страница</h1>
-  {% endif %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .admin-badge {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fbc2eb 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px rgba(255, 154, 158, 0.2);
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .btn-action i {
+        margin-right: 8px;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        margin: 2rem 0 1.5rem;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-title i {
+        margin-right: 10px;
+        color: #667eea;
+    }
+    
+    .post-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .post-table thead {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    }
+    
+    .post-table th {
+        padding: 1rem;
+        text-align: left;
+        color: #4a5568;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .post-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+    
+    .post-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .post-table tr:hover td {
+        background-color: #f8fafc;
+    }
+    
+    .post-link {
+        color: #4a5568;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .post-link:hover {
+        color: #667eea;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-not-started {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .status-in-progress {
+        background-color: #bee3f8;
+        color: #2b6cb0;
+    }
+    
+    .status-approved {
+        background-color: #c6f6d5;
+        color: #276749;
+    }
+    
+    .status-rejected {
+        background-color: #fed7d7;
+        color: #9b2c2c;
+    }
+    
+    .empty-state {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        color: #718096;
+    }
+    
+    .empty-state i {
+        font-size: 2rem;
+        color: #cbd5e0;
+        margin-bottom: 1rem;
+    }
+</style>
 
-  {% if user.is_authenticated %}
-    <div class="mb-3">
-      <button><a href="{% url 'post-create' %}">Создать пост</a></button>
-      <br>
-      {% if user.is_superuser %}
-        <button><a href="{% url 'register' %}">Зарегистрировать нового пользователя</a></button>
-        <br>
-        <button><a href="{% url 'admin-posts' %}">Список постов</a></button>
-        <br>
-        <button><a href="{% url 'create-special' %}">Добавить специальность</a></button>
-        <br>
-        <button><a href="{% url 'create-subject' %}">Добавить предмет</a></button>
-      {% endif %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        {% if user.is_superuser %}
+            <div class="admin-badge">
+                <i class="fas fa-crown"></i> Вы администратор системы
+            </div>
+            <h1>Панель управления</h1>
+        {% else %}
+            <h1>Моя рабочая область</h1>
+        {% endif %}
     </div>
 
-    <hr>
+    {% if user.is_authenticated %}
+        <div class="action-buttons">
+            <a href="{% url 'post-create' %}" class="btn-action">
+                <i class="fas fa-plus"></i> Создать пост
+            </a>
+            
+            {% if user.is_superuser %}
+                <a href="{% url 'register' %}" class="btn-action">
+                    <i class="fas fa-user-plus"></i> Зарегистрировать пользователя
+                </a>
+                <a href="{% url 'admin-posts' %}" class="btn-action">
+                    <i class="fas fa-list"></i> Список постов
+                </a>
+                <a href="{% url 'create-special' %}" class="btn-action">
+                    <i class="fas fa-graduation-cap"></i> Добавить специальность
+                </a>
+                <a href="{% url 'create-subject' %}" class="btn-action">
+                    <i class="fas fa-book"></i> Добавить предмет
+                </a>
+            {% endif %}
+        </div>
 
-    <h2>📝 Мои посты</h2>
-    {% if my_posts %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Заголовок</th>
-            <th>Дата</th>
-            <th>Статус</th>
-            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in my_posts %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
-              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
-              <td>{{ post.status }}</td>
-              <td>
-                {% if post.status_approval == 'not_started' %}
-                  Ожидает начала
-                {% elif post.status_approval == 'in_progress' %}
-                  В процессе согласования
-                {% elif post.status_approval == 'approved' %}
-                  ✅ Одобрено
-                {% elif post.status_approval == 'rejected' %}
-                  ❌ Отклонено
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        <h2 class="section-title"><i class="fas fa-edit"></i> Мои посты</h2>
+        {% if my_posts %}
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Заголовок</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                        <th>Согласование</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in my_posts %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'post-detail' post.pk %}" class="post-link">{{ post.title }}</a></td>
+                            <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ post.status|slugify }}">
+                                    {{ post.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if post.status_approval == 'not_started' %}
+                                    <span class="status-badge status-not-started">Ожидает начала</span>
+                                {% elif post.status_approval == 'in_progress' %}
+                                    <span class="status-badge status-in-progress">В процессе</span>
+                                {% elif post.status_approval == 'approved' %}
+                                    <span class="status-badge status-approved">✅ Одобрено</span>
+                                {% elif post.status_approval == 'rejected' %}
+                                    <span class="status-badge status-rejected">❌ Отклонено</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>У вас пока нет созданных постов</p>
+            </div>
+        {% endif %}
+
+        <h2 class="section-title"><i class="fas fa-hourglass-half"></i> Ожидают согласования</h2>
+        {% if approval_posts %}
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Заголовок</th>
+                        <th>Автор</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in approval_posts %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'post-detail' post.pk %}" class="post-link">{{ post.title }}</a></td>
+                            <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
+                            <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if post.status_approval == 'not_started' %}
+                                    <span class="status-badge status-not-started">Ожидает начала</span>
+                                {% elif post.status_approval == 'in_progress' %}
+                                    <span class="status-badge status-in-progress">В процессе</span>
+                                {% elif post.status_approval == 'approved' %}
+                                    <span class="status-badge status-approved">✅ Одобрено</span>
+                                {% elif post.status_approval == 'rejected' %}
+                                    <span class="status-badge status-rejected">❌ Отклонено</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>Нет постов, ожидающих вашего согласования</p>
+            </div>
+        {% endif %}
+
+        <h2 class="section-title"><i class="fas fa-check-circle"></i> Согласованные посты</h2>
+        {% if approved_posts %}
+            <table class="post-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Заголовок</th>
+                        <th>Автор</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in approved_posts %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'post-detail' post.pk %}" class="post-link">{{ post.title }}</a></td>
+                            <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
+                            <td>{{ post.created|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <span class="status-badge status-approved">✅ Одобрено</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>Вы еще не согласовали ни одного поста</p>
+            </div>
+        {% endif %}
+
     {% else %}
-      <p>У вас пока нет постов.</p>
+        <div class="empty-state" style="max-width: 600px; margin: 2rem auto;">
+            <i class="fas fa-lock" style="font-size: 3rem;"></i>
+            <h3 style="color: #2d3748; margin: 1rem 0;">Доступ ограничен</h3>
+            <p style="margin-bottom: 1.5rem;">Для просмотра и создания постов необходимо войти в систему</p>
+            <a href="{% url 'login' %}" class="btn-action" style="margin: 0 auto;">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </a>
+        </div>
     {% endif %}
-
-    <hr>
-
-    <h2>📥 Посты, ожидающие вашего согласования</h2>
-    {% if approval_posts %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Заголовок</th>
-            <th>Автор</th>
-            <th>Дата</th>
-            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in approval_posts %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
-              <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
-              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
-              <td>
-                {% if post.status_approval == 'not_started' %}
-                  Ожидает начала
-                {% elif post.status_approval == 'in_progress' %}
-                  В процессе согласования
-                {% elif post.status_approval == 'approved' %}
-                  ✅ Одобрено
-                {% elif post.status_approval == 'rejected' %}
-                  ❌ Отклонено
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Нет постов, ожидающих вашего согласования.</p>
-    {% endif %}
-
-    <hr>
-
-    <h2>✅ Посты, которые вы уже согласовали</h2>
-    {% if approved_posts %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Заголовок</th>
-            <th>Автор</th>
-            <th>Дата</th>
-            <th>Статус согласования</th> <!-- Добавлен столбец для статуса согласования -->
-          </tr>
-        </thead>
-        <tbody>
-          {% for post in approved_posts %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></td>
-              <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
-              <td>{{ post.created|date:"d.m.Y H:i" }}</td>
-              <td>
-                {% if post.status_approval == 'not_started' %}
-                  Ожидает начала
-                {% elif post.status_approval == 'in_progress' %}
-                  В процессе согласования
-                {% elif post.status_approval == 'approved' %}
-                  ✅ Одобрено
-                {% elif post.status_approval == 'rejected' %}
-                  ❌ Отклонено
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Нет постов, которые вы уже согласовали.</p>
-    {% endif %}
-
-  {% else %}
-    <p>Пожалуйста, войдите в систему, чтобы просматривать и создавать посты.</p>
-  {% endif %}
 </div>
 {% endblock %}

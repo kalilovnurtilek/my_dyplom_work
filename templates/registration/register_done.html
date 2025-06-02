@@ -1,8 +1,65 @@
 {% extends 'base.html' %}
-{% block title %} Добро пожаловать{% endblock %}
+{% block title %}Добро пожаловать!{% endblock %}
+
 {% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <!-- Карточка приветствия -->
+            <div class="card shadow-lg border-success">
+                <div class="card-body p-5">
+                    <!-- Анимированная иконка -->
+                    <div class="mb-4 text-success" style="font-size: 4rem;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    
+                    <!-- Персонализированное приветствие -->
+                    <h1 class="h3 mb-3">Добро пожаловать, {{ user.first_name }}!</h1>
+                    <p class="lead mb-4">Ваш аккаунт успешно создан и готов к использованию.</p>
+                    
+                    <!-- Основная кнопка входа -->
+                    <div class="d-grid gap-2 col-md-6 mx-auto">
+                        <a href="{% url 'login' %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Войти в аккаунт
+                        </a>
+                    </div>
+                    
+                    <!-- Дополнительная информация -->
+                    <div class="mt-4">
+                        <p class="small text-muted">
+                            Если возникнут вопросы, обратитесь в 
+                            <a href="#" class="text-decoration-none">службу поддержки</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<h1>Привет, {{ user.first_name }}</h1>
-    <p>Ваш аккаунт успешно создан! Теперь вы можете <a href="{% url 'login' %}">войти</a></p>
-
+<style>
+    .card {
+        border-radius: 1rem;
+        border-width: 2px;
+    }
+    .btn-success {
+        transition: all 0.3s ease;
+    }
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
+    }
+    .border-success {
+        border-color: #198754 !important;
+    }
+    /* Анимация иконки */
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-20px);}
+        60% {transform: translateY(-10px);}
+    }
+    .bi-check-circle-fill {
+        animation: bounce 1.5s ease infinite;
+    }
+</style>
 {% endblock %}

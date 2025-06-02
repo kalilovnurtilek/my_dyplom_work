@@ -2,124 +2,325 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .form-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2d3748;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8fafc;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        background-color: white;
+    }
+    
+    .form-textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        margin: 2rem 0 1rem;
+        color: #2d3748;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .dynamic-container {
+        margin-top: 1rem;
+    }
+    
+    .dynamic-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: center;
+    }
+    
+    .dynamic-item select,
+    .dynamic-item input {
+        flex: 1;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .btn-secondary:hover {
+        background: #cbd5e0;
+    }
+    
+    .btn-danger {
+        background: #fed7d7;
+        color: #9b2c2c;
+    }
+    
+    .btn-danger:hover {
+        background: #feb2b2;
+    }
+    
+    .btn-warning {
+        background: #feebc8;
+        color: #9c4221;
+    }
+    
+    .btn-warning:hover {
+        background: #fbd38d;
+    }
+    
+    .btn-icon {
+        padding: 0.5rem;
+        min-width: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .file-label {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-label:hover {
+        background: #cbd5e0;
+    }
+    
+    .file-name {
+        margin-left: 1rem;
+        color: #4a5568;
+    }
+</style>
 
-  <div class="mb-3">
-    <label for="{{ form.title.id_for_label }}">Заголовок</label>
-    {{ form.title }}
-  </div>
-
-  <div class="mb-3">
-    <label for="{{ form.content.id_for_label }}">Содержимое</label>
-    {{ form.content }}
-  </div>
-
-  <div class="mb-3">
-    <label for="{{ form.status.id_for_label }}">Статус</label>
-    {{ form.status }}
-  </div>
-
-
-
-  <div class="mb-3">
-    <label for="{{ form.pdf_file.id_for_label }}">Заявление студента (PDF/скан)</label>
-    {{ form.pdf_file }}
-  </div>
-
-  <div class="mb-3">
-    <label for="{{ form.specialty.id_for_label }}">Приоритетная специальность</label>
-    {{ form.specialty }}
-    {% if form.specialty.errors %}
-      <div class="text-danger">{{ form.specialty.errors }}</div>
-    {% endif %}
-  </div>
-
-
-  <h4 class="mt-4">Предметы и кредиты:</h4>
-  <div id="subject-credits">
-    <div class="subject-credit mb-2 d-flex gap-2">
-      <select name="subjects[]" class="form-control">
-        {% for subject in subjects %}
-          <option value="{{ subject.id }}">{{ subject.name }}</option>
-        {% endfor %}
-      </select>
-      <input type="number" name="credits[]" class="form-control" placeholder="Кредиты" step="0.5" min="0">
+<div class="form-container">
+    <div class="form-header">
+        <h2>Создание новой записи</h2>
+        <p>Заполните все необходимые поля для создания новой записи</p>
     </div>
-  </div>
-  <button type="button" class="btn btn-secondary mt-2" onclick="addSubjectCredit()">+ Добавить предмет</button>
-  
-  <script>
-    function addSubjectCredit() {
-      const div = document.querySelector('.subject-credit').cloneNode(true);
-      div.querySelector('select').value = "";
-      div.querySelector('input').value = "";
-      document.getElementById('subject-credits').appendChild(div);
-    }
-  </script>
-  
 
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}" class="form-label">Заголовок</label>
+            {% render_field form.title class="form-control" %}
+            {% if form.title.errors %}
+                <div class="error-message">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
 
-  <h4 class="mt-4">Маршрут согласования:</h4>
-  <div id="approval-steps">
-    <div class="approval-step mb-2 d-flex gap-2">
-      <label>Выберите пользователя:</label>
-      <select name="approvers[]" class="form-control">
-        {% for user in users %}
-          <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
-        {% endfor %}
-      </select>
-      <button type="button" class="btn btn-danger" onclick="removeApprover(this)">Удалить пользователя</button>
-      <button type="button" class="btn btn-warning" onclick="moveUp(this)">↑</button>
-      <button type="button" class="btn btn-warning" onclick="moveDown(this)">↓</button>
-    </div>
-  </div>
-  
-  <button type="button" class="btn btn-secondary mt-2" onclick="addApprovalStep()">+ Добавить этап</button>
-  
-  <script>
-    function addApprovalStep() {
-      const step = document.querySelector('.approval-step').cloneNode(true);
-      step.querySelector('select').value = ""; // Очистка значения
-      document.getElementById('approval-steps').appendChild(step);
-    }
-  
-    function removeApprover(button) {
-      const step = button.closest('.approval-step');
-      step.remove(); // Удаляет шаг
-    }
-  
-    function moveUp(button) {
-      const step = button.closest('.approval-step');
-      const previousStep = step.previousElementSibling;
-      if (previousStep) {
-        document.getElementById('approval-steps').insertBefore(step, previousStep);
-      }
-    }
-  
-    function moveDown(button) {
-      const step = button.closest('.approval-step');
-      const nextStep = step.nextElementSibling;
-      if (nextStep) {
-        document.getElementById('approval-steps').insertBefore(nextStep, step);
-      }
-    }
-  </script>
-  
-  
-  
-  
-  
-  <br>
-  <button type="submit" class="btn btn-primary">Создать запись</button>
-</form>
+        <div class="form-group">
+            <label for="{{ form.content.id_for_label }}" class="form-label">Содержимое</label>
+            {% render_field form.content class="form-control form-textarea" %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.status.id_for_label }}" class="form-label">Статус</label>
+            {% render_field form.status class="form-control" %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.pdf_file.id_for_label }}" class="form-label">Заявление студента (PDF/скан)</label>
+            <label for="id_pdf_file" class="file-label">
+                <i class="fas fa-file-pdf"></i> Выберите файл
+            </label>
+            <span id="file-name" class="file-name">Файл не выбран</span>
+            {% render_field form.pdf_file class="file-input" %}
+            {% if form.pdf_file.errors %}
+                <div class="error-message">{{ form.pdf_file.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.specialty.id_for_label }}" class="form-label">Приоритетная специальность</label>
+            {% render_field form.specialty class="form-control" %}
+            {% if form.specialty.errors %}
+                <div class="error-message">{{ form.specialty.errors }}</div>
+            {% endif %}
+        </div>
+
+        <h4 class="section-title">Предметы и кредиты</h4>
+        <div id="subject-credits" class="dynamic-container">
+            <div class="dynamic-item">
+                <select name="subjects[]" class="form-control">
+                    <option value="">Выберите предмет</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="credits[]" class="form-control" placeholder="Кредиты" step="0.5" min="0">
+                <button type="button" class="btn btn-danger btn-icon" onclick="removeItem(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="addSubjectCredit()">
+            <i class="fas fa-plus"></i> Добавить предмет
+        </button>
+
+        <h4 class="section-title">Маршрут согласования</h4>
+        <div id="approval-steps" class="dynamic-container">
+            <div class="dynamic-item">
+                <select name="approvers[]" class="form-control">
+                    <option value="">Выберите пользователя</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-danger btn-icon" onclick="removeItem(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-warning btn-icon" onclick="moveUp(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="btn btn-warning btn-icon" onclick="moveDown(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="addApprovalStep()">
+            <i class="fas fa-plus"></i> Добавить этап
+        </button>
+
+        <div class="form-group" style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Создать запись
+            </button>
+        </div>
+    </form>
+</div>
 
 <script>
-  function addApprovalStep() {
-    const step = document.querySelector('.approval-step').cloneNode(true);
-    step.querySelector('select').value = "";
-    document.getElementById('approval-steps').appendChild(step);
-  }
+    // Файловый инпут
+    document.getElementById('id_pdf_file').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+        document.getElementById('file-name').textContent = fileName;
+    });
+
+    // Динамическое добавление предметов
+    function addSubjectCredit() {
+        const container = document.getElementById('subject-credits');
+        const newItem = container.querySelector('.dynamic-item').cloneNode(true);
+        newItem.querySelector('select').value = "";
+        newItem.querySelector('input').value = "";
+        container.appendChild(newItem);
+    }
+
+    // Динамическое добавление этапов согласования
+    function addApprovalStep() {
+        const container = document.getElementById('approval-steps');
+        const newItem = container.querySelector('.dynamic-item').cloneNode(true);
+        newItem.querySelector('select').value = "";
+        container.appendChild(newItem);
+    }
+
+    // Удаление элемента
+    function removeItem(button) {
+        const item = button.closest('.dynamic-item');
+        // Не удаляем последний элемент
+        if (item.parentElement.children.length > 1) {
+            item.remove();
+        }
+    }
+
+    // Перемещение вверх
+    function moveUp(button) {
+        const item = button.closest('.dynamic-item');
+        const prevItem = item.previousElementSibling;
+        if (prevItem) {
+            item.parentNode.insertBefore(item, prevItem);
+        }
+    }
+
+    // Перемещение вниз
+    function moveDown(button) {
+        const item = button.closest('.dynamic-item');
+        const nextItem = item.nextElementSibling;
+        if (nextItem) {
+            item.parentNode.insertBefore(nextItem, item);
+        }
+    }
+
+    // Инициализация - скрываем кнопки удаления/перемещения для первого элемента
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstSubjectItem = document.querySelector('#subject-credits .dynamic-item');
+        const firstApprovalItem = document.querySelector('#approval-steps .dynamic-item');
+        
+        if (firstSubjectItem) {
+            firstSubjectItem.querySelector('.btn-danger').style.visibility = 'hidden';
+        }
+        
+        if (firstApprovalItem) {
+            firstApprovalItem.querySelector('.btn-danger').style.visibility = 'hidden';
+            firstApprovalItem.querySelector('.btn-warning:nth-of-type(1)').style.visibility = 'hidden';
+        }
+    });
 </script>
 {% endblock %}

@@ -5,73 +5,726 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         {% if title %}
-            {{ title }}
+            {{ title }} | MyProject
         {% else %}
-            Какая то страница
+            Добро пожаловать в MyProject
         {% endif %}
-        </title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        /* --- Updated CSS Variables with new color palette --- */
+        :root {
+            --primary-pink: #ff9a9e;
+            --primary-lightpink: #fbc2eb;
+            --accent-lilac: #c4b5fd;
+            --dark-purple: #6b46c1; /* Deep purple instead of navy */
+            --light-bg: #fff5f5; /* Very light pink background */
+            --light-bg-secondary: #f8f4ff; /* Light lilac */
+            --text-dark: #4a5568; /* Soft dark gray */
+            --text-light: #fdfefe;
+            --shadow-light: rgba(149, 117, 205, 0.12);
+            --shadow-medium: rgba(149, 117, 205, 0.2);
+            --border-radius-soft: 12px;
+            --gradient-start: #fff5f5; /* Lighter shade for body gradient */
+            --gradient-end: #f8f4ff; /* Slightly darker shade for body gradient */
+            
+            /* Dark mode variables */
+            --dark-bg: #1a1a2e;
+            --dark-bg-secondary: #16213e;
+            --dark-text: #e6e6e6;
+            --dark-text-secondary: #b8b8b8;
+            --dark-shadow: rgba(0, 0, 0, 0.3);
+            --dark-border: #2d3748;
+            --dark-card-bg: #16213e;
+        }
+
+        /* --- Global Styles & Typography --- */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, var(--gradient-start), var(--gradient-end));
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.3s ease;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: linear-gradient(to bottom right, var(--dark-bg), var(--dark-bg-secondary));
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode h4,
+        body.dark-mode h5,
+        body.dark-mode h6 {
+            color: var(--primary-lightpink);
+        }
+        
+        body.dark-mode .animated-card {
+            background-color: var(--dark-card-bg);
+            color: var(--dark-text);
+            box-shadow: 0 4px 20px var(--dark-shadow);
+        }
+        
+        body.dark-mode .animated-card:hover {
+            box-shadow: 0 8px 25px var(--dark-shadow);
+        }
+        
+        body.dark-mode .dropdown-menu {
+            background-color: var(--dark-bg-secondary);
+            border: 1px solid var(--dark-border);
+        }
+        
+        body.dark-mode .dropdown-item {
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .dropdown-item:hover {
+            background-color: var(--primary-pink);
+            color: var(--text-light);
+        }
+
+        /* --- Particle Background Layer --- */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-purple);
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        /* --- Navbar Styles --- */
+        .navbar {
+            background-color: var(--dark-purple) !important;
+            box-shadow: 0 4px 15px var(--shadow-light);
+            padding: 1rem 0;
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-light) !important;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            padding: 0.75rem 1.2rem;
+            border-radius: var(--border-radius-soft);
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover i {
+            color: var(--primary-lightpink);
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--text-light) !important;
+            transform: translateY(-3px);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-lightpink);
+            transition: width 0.3s ease-out;
+        }
+
+        .navbar-nav .nav-link.active::after,
+        .navbar-nav .nav-link:hover::after {
+            width: calc(100% - 2.4rem);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--text-light) !important;
+            background-color: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+        }
+        .navbar-nav .nav-link.active i {
+            color: var(--primary-lightpink);
+        }
+
+        /* --- Dropdown Styles --- */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 20px var(--shadow-medium);
+            border-radius: var(--border-radius-soft);
+            padding: 0.5rem 0;
+            animation: fadeIn 0.2s ease-out forwards;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item {
+            color: var(--text-dark);
+            padding: 0.75rem 1.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        .dropdown-item i {
+            margin-right: 10px;
+            color: rgba(107, 70, 193, 0.7);
+            transition: color 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-pink);
+            color: var(--text-light);
+        }
+        .dropdown-item:hover i {
+            color: var(--text-light);
+        }
+
+        /* --- Main Content Area --- */
+        main {
+            flex: 1;
+            padding-top: 3.5rem;
+            padding-bottom: 4.5rem;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* --- Footer Styles --- */
+        footer {
+            background-color: var(--dark-purple);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 2.5rem 0;
+            text-align: center;
+            box-shadow: 0 -4px 15px var(--shadow-light);
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--primary-lightpink);
+        }
+
+        /* --- Accessibility: Focus States --- */
+        a:focus, button:focus, .dropdown-toggle:focus {
+            outline: 2px solid var(--accent-lilac) !important;
+            outline-offset: 3px;
+            box-shadow: 0 0 0 4px rgba(196, 181, 253, 0.25) !important;
+            border-radius: var(--border-radius-soft);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Preloader Styles --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-purple);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+            opacity: 1;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--primary-lightpink);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Back to Top Button --- */
+        #backToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-pink), var(--primary-lightpink));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--shadow-light);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        #backToTopBtn.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #backToTopBtn:hover {
+            opacity: 0.9;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px var(--shadow-medium);
+        }
+
+        /* --- Card Styling --- */
+        .animated-card {
+            background-color: white;
+            border-radius: var(--border-radius-soft);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .animated-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow-medium);
+        }
+
+        /* --- Button Styles --- */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-pink), var(--primary-lightpink));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-soft);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(255, 154, 158, 0.15);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 154, 158, 0.2);
+        }
+
+        /* Enhanced button hover effect */
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-lightpink), var(--primary-pink));
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+            border-radius: var(--border-radius-soft);
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        /* Pulse animation on click */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 154, 158, 0.7);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(255, 154, 158, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 154, 158, 0);
+            }
+        }
+
+        .btn-primary:active {
+            animation: pulse 0.5s;
+        }
+
+        /* Dark mode toggle button */
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-soft);
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .theme-toggle {
+            color: var(--dark-text);
+        }
+
+        /* --- Icon Colors --- */
+        .text-primary { color: var(--primary-pink) !important; }
+        .text-success { color: var(--accent-lilac) !important; }
+        .text-info { color: #a78bfa !important; } /* Lighter lilac */
+        
+        /* Dark mode icon colors */
+        body.dark-mode .text-primary { color: var(--primary-lightpink) !important; }
+        body.dark-mode .text-success { color: var(--accent-lilac) !important; }
+        body.dark-mode .text-info { color: #c4b5fd !important; }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-        <div class="container-fluid">
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="particles-js"></div>
+
+    <nav class="navbar navbar-expand-lg" data-aos="fade-down" data-aos-duration="1000">
+        <div class="container">
           <a class="navbar-brand" href="#">MyProject</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                <a class="nav-link {% if request.resolver_match.url_name == 'index-page' %}active{% endif %}" aria-current="page" href="{% url 'index-page' %}">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+              </li>
+              </ul>
             <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'index-page' %}">На главную</a>
-              </li>
-
-              <!-- <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'get-about' %}">О нас</a>
-              </li>  
-             -->
+                <li class="nav-item">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown" data-aos="fade-left" data-aos-delay="200">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fas fa-user-circle"></i> Привет, {{ user.get_username }}!
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                      <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+                    </ul>
+                  </li>
+                {% else %}
+                <li class="nav-item" data-aos="fade-left" data-aos-delay="200">
+                  <a class="nav-link" href="{% url 'login' %}">
+                      <i class="fas fa-sign-in-alt"></i> Вход
+                  </a>
+                </li>
+                {% endif %}
             </ul>
-            {% if user.is_authenticated %}
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <!-- {% if user.is_superuser %}
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Зарегистрировать пользователя</a>
-              </li>
-              {% endif %} -->
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Пользователь: {{ user.get_username }}</a>
-              </li>  
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">Выход</a>
-              </li>
-            </ul>
-            {% else %}  
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Вход</a>
-              </li>  
-              
-            </ul>
-
-            {% endif %}
           </div>
         </div>
-      </nav>
+    </nav>
 
-    {% block content %}
-    {% endblock %}
+    <main class="container">
+        {% block content %}
+            <section class="animated-card" data-aos="fade-up" data-aos-duration="1000">
+                <h2>Добро пожаловать в MyProject!</h2>
+                <p>Мы рады приветствовать вас на нашей обновлённой странице. Здесь вы найдёте самую свежую информацию и сможете легко перемещаться по разделам сайта. Мы постоянно работаем над улучшением вашего опыта!</p>
+                <p>Прокрутите страницу вниз, чтобы увидеть больше интерактивных элементов и красивых анимаций. Мы постарались сделать ваш визит максимально приятным.</p>
+                <a href="#" class="btn btn-primary mt-3">Подробнее о нас</a>
+            </section>
 
-    <!-- <ul>    
-      {% if user.is_authenticated %}
-          <li>Пользователь: {{ user.get_username }}</li>
-          <li><a href="{% url 'logout' %}">Выход</a></li>
-      {% else %}      
-          <li><a href="{% url 'login' %}">Вход</a></li>
-          <li><a href="{% url 'register' %}">Зарегистрироваться</a></li>
-      {% endif %}
-    </ul> -->
+            <section class="animated-card" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+                <h3>Наши преимущества</h3>
+                <div class="row text-center mt-4">
+                    <div class="col-md-4 mb-4" data-aos="zoom-in" data-aos-delay="300">
+                        <i class="fas fa-rocket fa-3x text-primary mb-3"></i>
+                        <h4>Быстрый старт</h4>
+                        <p>Начните работу с нами в считанные минуты!</p>
+                    </div>
+                    <div class="col-md-4 mb-4" data-aos="zoom-in" data-aos-delay="400">
+                        <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                        <h4>Высокая надёжность</h4>
+                        <p>Ваши данные под надёжной защитой.</p>
+                    </div>
+                    <div class="col-md-4 mb-4" data-aos="zoom-in" data-aos-delay="500">
+                        <i class="fas fa-life-ring fa-3x text-info mb-3"></i>
+                        <h4>Поддержка 24/7</h4>
+                        <p>Мы всегда готовы помочь в любое время.</p>
+                    </div>
+                </div>
+            </section>
 
-  <!-- {% include "posts/includes/link_include.html" %} -->
+            <section class="animated-card" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+                <h3>Что нового?</h3>
+                <p>Мы обновили дизайн, добавили интерактивные элементы и улучшили производительность, чтобы сделать ваш опыт максимально комфортным. Следите за новостями!</p>
+                <button class="btn btn-primary mt-3" id="demoBtn">Демо анимации</button>
+            </section>
+        {% endblock %}
+    </main>
+
+    <footer class="footer mt-auto py-3" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+        <div class="container">
+            <span>&copy; {{ "now"|date:"Y" }} MyProject. Все права защищены.</span>
+            <ul class="list-unstyled d-flex justify-content-center mt-3">
+                <li class="mx-3"><a href="#"><i class="fas fa-file-contract"></i> Политика конфиденциальности</a></li>
+                <li class="mx-3"><a href="#"><i class="fas fa-book"></i> Условия использования</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <button id="backToTopBtn" title="Наверх">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preloader functionality
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.style.opacity = '0';
+                    setTimeout(() => preloader.style.display = 'none', 500);
+                }, 1000);
+            }
+
+            // Initialize AOS
+            AOS.init({
+                once: true,
+                mirror: false
+            });
+
+            // Initialize Particles.js with new color scheme
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 120,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": ["#ff9a9e", "#fbc2eb", "#c4b5fd"] // Pink/lilac color palette
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.7,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 0.5,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": false,
+                            "speed": 40,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#d8b4fe", // Light lilac for lines
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1.5,
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 1
+                            }
+                        },
+                        "bubble": {
+                            "distance": 400,
+                            "size": 40,
+                            "duration": 2,
+                            "opacity": 0.8,
+                            "speed": 3
+                        },
+                        "repulse": {
+                            "distance": 200,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        },
+                        "remove": {
+                            "particles_nb": 2
+                        }
+                    }
+                },
+                "retina_detect": true,
+                "background": {
+                    "color": "#f8f4ff", // Light lilac background
+                    "opacity": 0
+                }
+            });
+
+            // Back to Top Button functionality
+            const backToTopBtn = document.getElementById('backToTopBtn');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Dark mode toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            
+            // Check for saved theme preference or use system preference
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                localStorage.setItem('theme', theme);
+                
+                if (theme === 'dark') {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            });
+            
+            // Demo button animation
+            const demoBtn = document.getElementById('demoBtn');
+            if (demoBtn) {
+                demoBtn.addEventListener('click', function() {
+                    // Add temporary animation class
+                    this.classList.add('btn-animate');
+                    
+                    // Remove after animation completes
+                    setTimeout(() => {
+                        this.classList.remove('btn-animate');
+                    }, 1000);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
