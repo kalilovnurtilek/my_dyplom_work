@@ -138,25 +138,25 @@
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
-            <h1 class="auth-title">Добро пожаловать!</h1>
-            <p class="auth-subtitle">Войдите в свой аккаунт</p>
+            <h1 class="auth-title">Кош келиңиз!</h1>
+            <p class="auth-subtitle">Аккаунтуңузга кириңиз</p>
         </div>
         
         <div class="auth-body">
             {% if form.errors %}
                 <div class="message message-error">
-                    <p>Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.</p>
+                    <p>Турра эмес логин же сыр сөз. Сураныч, башынан кайталаңыз.</p>
                 </div>
             {% endif %}
             
             {% if next %}
                 {% if user.is_authenticated %}
                     <div class="message message-info">
-                        <p>У вас нет доступа к этой странице. Требуется учетная запись с соответствующими правами.</p>
+                        <p>Бул баракка кирүү мүмкүнчүлүгүңүз жок. Тиешелүү укуктары бар аккаунт талап кылынат.</p>
                     </div>
                 {% else %}
                     <div class="message message-info">
-                        <p>Пожалуйста, войдите для доступа к этой странице.</p>
+                        <p>Сураныч, бул баракчага кирүү үчүн кириңиз.</p>
                     </div>
                 {% endif %}
             {% endif %}
@@ -165,25 +165,24 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="id_username">Имя пользователя</label>
+                    <label for="id_username">Колдонуучунун аты</label>
                     <input type="text" name="username" id="id_username" class="form-control" required autofocus>
                 </div>
                 
                 <div class="form-group">
-                    <label for="id_password">Пароль</label>
+                    <label for="id_password">Сыр сөз</label>
                     <input type="password" name="password" id="id_password" class="form-control" required>
                 </div>
                 
-                <button type="submit" class="btn-primary">Войти</button>
+                <button type="submit" class="btn-primary">Кирүү</button>
                 <input type="hidden" name="next" value="{{ next }}">
             </form>
         </div>
         
         <div class="auth-footer">
             <p>
-                <a href="{% url 'password_reset' %}" class="auth-link">Забыли пароль?</a>
-                &nbsp;|&nbsp;
-                <a href="#" class="auth-link">Регистрация</a>
+                <a href="{% url 'password_reset' %}" class="auth-link">Сыр сөзүңүздү унутуп калдыңызбы?</a>
+                
             </p>
         </div>
     </div>

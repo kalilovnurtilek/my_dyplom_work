@@ -6,7 +6,7 @@
         <div class="col-lg-6">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0"><i class="bi bi-bookmark-plus me-2"></i>Добавить новый предмет</h2>
+                    <h2 class="h5 mb-0"><i class="bi bi-bookmark-plus me-2"></i>Жаңы предмет кошуу</h2>
                 </div>
                 <div class="card-body">
                     <form method="post" class="needs-validation" novalidate>
@@ -33,7 +33,7 @@
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i> Сохранить предмет
+                                <i class="bi bi-save me-1"></i> Предметти сактоо
                             </button>
                         </div>
                     </form>
@@ -45,7 +45,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-white border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h2 class="h5 mb-0"><i class="bi bi-list-task me-2"></i>Список предметов</h2>
+                        <h2 class="h5 mb-0"><i class="bi bi-list-task me-2"></i>Предметтер тизмеси</h2>
                         <span class="badge bg-primary rounded-pill">{{ subjects.count }}</span>
                     </div>
                 </div>
@@ -53,15 +53,15 @@
                     <form method="get" class="mb-3">
                         <div class="input-group">
                             <input type="text" name="q" class="form-control" 
-                                   placeholder="Поиск по названию предмета..." 
+                                   placeholder="Предметтин аталышы аркылуу издөө..." 
                                    value="{{ request.GET.q }}"
-                                   aria-label="Поиск предметов">
+                                   aria-label="Предметти издөө">
                             <button class="btn btn-outline-primary" type="submit">
                                 <i class="bi bi-search"></i> Поиск
                             </button>
                             {% if request.GET.q %}
                             <a href="?" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-lg"></i> Сброс
+                                <i class="bi bi-x-lg"></i> таштоо
                             </a>
                             {% endif %}
                         </div>
@@ -72,7 +72,7 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Название предмета</th>
+                                    <th>Предметтер аталышы</th>
                                     <th class="text-end">Действия</th>
                                 </tr>
                             </thead>
@@ -82,10 +82,10 @@
                                     <td>{{ subject.name }}</td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm">
-                                            <a href="#" class="btn btn-outline-primary" title="Редактировать">
+                                            <a href="#" class="btn btn-outline-primary" title="Редактирлөө">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <a href="#" class="btn btn-outline-danger" title="Удалить">
+                                            <a href="#" class="btn btn-outline-danger" title="Өчүрүү">
                                                 <i class="bi bi-trash"></i>
                                             </a>
                                         </div>
@@ -97,7 +97,7 @@
                     </div>
                     {% else %}
                     <div class="alert alert-info mb-0">
-                        <i class="bi bi-info-circle me-2"></i>Предметы не найдены
+                        <i class="bi bi-info-circle me-2"></i>Предмет табылган жок
                     </div>
                     {% endif %}
                     

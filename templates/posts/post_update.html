@@ -105,15 +105,15 @@
 
 <div class="update-container">
     <div class="update-header">
-        <h1 class="update-title">Редактирование записи</h1>
-        <p>Измените необходимые поля и сохраните изменения</p>
+        <h1 class="update-title">Өтүнмөнү редактирлөө</h1>
+        <p>Өтүнмөнү өзгөртүү үчүн керектүү талааларды өзгортүңуз</p>
     </div>
     
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
         <div class="form-group">
-            <label for="{{ form.title.id_for_label }}">Заголовок</label>
+            <label for="{{ form.title.id_for_label }}">Аты-жөнү</label>
             <input type="text" name="{{ form.title.name }}" 
                    id="{{ form.title.id_for_label }}" 
                    class="form-control" 
@@ -124,7 +124,7 @@
         </div>
         
         <div class="form-group">
-            <label for="{{ form.content.id_for_label }}">Содержимое</label>
+            <label for="{{ form.content.id_for_label }}">Түзулүшү</label>
             <textarea name="{{ form.content.name }}" 
                       id="{{ form.content.id_for_label }}" 
                       class="form-control" 
@@ -149,7 +149,7 @@
         </div>
         
         <div class="form-group">
-            <label for="{{ form.specialty.id_for_label }}">Специальность</label>
+            <label for="{{ form.specialty.id_for_label }}">Адистик</label>
             <select name="{{ form.specialty.name }}" 
                     id="{{ form.specialty.id_for_label }}" 
                     class="form-control">
@@ -169,7 +169,7 @@
             <label>PDF файл</label>
             <div class="file-upload">
                 <label for="{{ form.pdf_file.id_for_label }}" class="file-upload-label">
-                    <i class="fas fa-file-upload"></i> Выберите файл
+                    <i class="fas fa-file-upload"></i> Файл тандаңыз
                 </label>
                 <input type="file" name="{{ form.pdf_file.name }}" 
                        id="{{ form.pdf_file.id_for_label }}" 
@@ -177,7 +177,7 @@
                        style="display: none;">
                 {% if form.pdf_file.value %}
                     <div class="current-file">
-                        Текущий файл: <a href="{{ form.pdf_file.value.url }}" target="_blank">{{ form.pdf_file.value }}</a>
+                        Азыркы Файл: <a href="{{ form.pdf_file.value.url }}" target="_blank">{{ form.pdf_file.value }}</a>
                     </div>
                 {% endif %}
             </div>
@@ -188,10 +188,10 @@
         
         <div class="form-group">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Сохранить изменения
+                <i class="fas fa-save"></i> Өзгөрүүлөрдү сактоо
             </button>
             <a href="{% url 'post-detail' post.id %}" class="btn" style="margin-left: 1rem;">
-                <i class="fas fa-times"></i> Отмена
+                <i class="fas fa-times"></i> өзгөрүүлөрдү жокко чыгаруу
             </a>
         </div>
     </form>

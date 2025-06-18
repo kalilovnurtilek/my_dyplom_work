@@ -61,7 +61,7 @@ def generate_post_pdf(post):
         ('FONTSIZE',   (0, 0), (-1, -1), 12),
     ]))
     elements.append(table)
-
+ 
     # Добавляем маршрут согласования
     elements.append(Spacer(1, 24))
     elements.append(Paragraph('Маршрут согласования:', styles['ProtocolTitle']))

@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import IndexView,  AboutView ,PostCreateView, PostUpdateView, PostDeleteView, PostDetailView,SuperuserPostListView,CreateSpecialtyView, CreateSubjectView
+
+from .views import IndexView,  AboutView ,PostCreateView, PostUpdateView, PostDeleteView, PostDetailView,SuperuserPostListView,CreateSpecialtyView, CreateSubjectView, calculate_credits_api, get_curriculums, CurriculumCreateView, get_specialty_transcript
 
 
 
@@ -14,5 +15,9 @@ urlpatterns = [
     path('admin-posts/', SuperuserPostListView.as_view(), name='admin-posts'),
     path('create-specialty/', CreateSpecialtyView.as_view(), name="create-special"),
     path('create-subject/', CreateSubjectView.as_view(), name="create-subject"),
+    path('api/calculate-credits/', calculate_credits_api, name='calculate-credits'),
+    path('api/get-curriculums/', get_curriculums, name='get-curriculums'),
+    path('curriculum/create/', CurriculumCreateView.as_view(), name='curriculum-create'),
+    path('api/get_specialty_transcript/', get_specialty_transcript, name='get_specialty_transcript'),
     
 ]

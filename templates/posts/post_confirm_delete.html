@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Удаленте посьа {{ post.title }}</h1>
+<h1>Өтүнмөнү өчүрүү {{ post.title }}</h1>
 <form action="{% url 'post-delete' post.id %}" method="post">
     {% csrf_token %}
-    <button type="submit">Удалить пост</button>
-</form>
+    <button type="submit">Өчүрүү</button>
+</form> 
 <a href="{% url 'post-update' post.id %}">
-    <button type="submit">Обновить запись</button>
+    <button type="submit">Жаңылоо</button>
 
 {% endblock %}

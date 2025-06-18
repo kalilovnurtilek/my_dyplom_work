@@ -14,20 +14,20 @@
                                     <i class="bi bi-search text-secondary"></i>
                                 </span>
                                 <input type="text" name="q" class="form-control form-control-lg" 
-                                       placeholder="Поиск по названию..." 
+                                       placeholder="Аталышы менен издөө" 
                                        value="{{ request.GET.q }}"
-                                       aria-label="Поиск постов">
+                                       aria-label="Өтүңмөнү издөө">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-search me-2"></i>Найти
+                                <i class="bi bi-search me-2"></i>Издөө
                             </button>
                         </div>
                         {% if request.GET.q %}
                         <div class="col-12 mt-2">
                             <a href="?" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-x-lg me-1"></i>Сбросить фильтр
+                                <i class="bi bi-x-lg me-1"></i>Фильтрди очүрүү
                             </a>
                         </div>
                         {% endif %}
@@ -71,8 +71,8 @@
                 {% else %}
                 <div class="card-body text-center py-5">
                     <i class="bi bi-exclamation-circle display-5 text-muted mb-3"></i>
-                    <h3 class="h5">Посты не найдены</h3>
-                    <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                    <h3 class="h5">Өтүнмөлөр табылган жок</h3>
+                    <p class="text-muted">Издөө параметрин өзгөртүңүз</p>
                 </div>
                 {% endif %}
             </div>

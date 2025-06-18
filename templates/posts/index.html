@@ -164,46 +164,46 @@
     <div class="dashboard-header">
         {% if user.is_superuser %}
             <div class="admin-badge">
-                <i class="fas fa-crown"></i> Вы администратор системы
+                <i class="fas fa-crown"></i> Сиз бул системанын администраторусуз
             </div>
-            <h1>Панель управления</h1>
+            <h1>Башкы бет</h1>
         {% else %}
-            <h1>Моя рабочая область</h1>
+            <h1>Башкы бет</h1>
         {% endif %}
     </div>
 
     {% if user.is_authenticated %}
         <div class="action-buttons">
             <a href="{% url 'post-create' %}" class="btn-action">
-                <i class="fas fa-plus"></i> Создать пост
+                <i class="fas fa-plus"></i> Өтүнмө түзүү
             </a>
             
             {% if user.is_superuser %}
                 <a href="{% url 'register' %}" class="btn-action">
-                    <i class="fas fa-user-plus"></i> Зарегистрировать пользователя
+                    <i class="fas fa-user-plus"></i> Жаңы колдонуучуну каттоо
                 </a>
                 <a href="{% url 'admin-posts' %}" class="btn-action">
-                    <i class="fas fa-list"></i> Список постов
+                    <i class="fas fa-list"></i> Өтүнмөлөрдүн тизмеси
                 </a>
                 <a href="{% url 'create-special' %}" class="btn-action">
-                    <i class="fas fa-graduation-cap"></i> Добавить специальность
+                    <i class="fas fa-graduation-cap"></i> Базага жаңы адистик кошуу
                 </a>
                 <a href="{% url 'create-subject' %}" class="btn-action">
-                    <i class="fas fa-book"></i> Добавить предмет
+                    <i class="fas fa-book"></i> Базага жаңы предмет кошуу
                 </a>
             {% endif %}
         </div>
 
-        <h2 class="section-title"><i class="fas fa-edit"></i> Мои посты</h2>
+        <h2 class="section-title"><i class="fas fa-edit"></i> Менин өтүнмөлөрүм</h2>
         {% if my_posts %}
             <table class="post-table">
                 <thead>
                     <tr>
                         <th>№</th>
-                        <th>Заголовок</th>
+                        <th>Аталышы</th>
                         <th>Дата</th>
                         <th>Статус</th>
-                        <th>Согласование</th>
+                        <th>Макулдашуу статусу</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -219,13 +219,13 @@
                             </td>
                             <td>
                                 {% if post.status_approval == 'not_started' %}
-                                    <span class="status-badge status-not-started">Ожидает начала</span>
+                                    <span class="status-badge status-not-started">Күтүп жатат</span>
                                 {% elif post.status_approval == 'in_progress' %}
-                                    <span class="status-badge status-in-progress">В процессе</span>
+                                    <span class="status-badge status-in-progress">Процессте</span>
                                 {% elif post.status_approval == 'approved' %}
-                                    <span class="status-badge status-approved">✅ Одобрено</span>
+                                    <span class="status-badge status-approved">✅ Макулдашылды</span>
                                 {% elif post.status_approval == 'rejected' %}
-                                    <span class="status-badge status-rejected">❌ Отклонено</span>
+                                    <span class="status-badge status-rejected">❌ Четке кагылды</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -235,17 +235,17 @@
         {% else %}
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
-                <p>У вас пока нет созданных постов</p>
+                <p>Өтүнмөлөр табылган жок</p>
             </div>
         {% endif %}
 
-        <h2 class="section-title"><i class="fas fa-hourglass-half"></i> Ожидают согласования</h2>
+        <h2 class="section-title"><i class="fas fa-hourglass-half"></i> Макулдашууну күтүп жатат</h2>
         {% if approval_posts %}
             <table class="post-table">
                 <thead>
                     <tr>
                         <th>№</th>
-                        <th>Заголовок</th>
+                        <th>Аталышы</th>
                         <th>Автор</th>
                         <th>Дата</th>
                         <th>Статус</th>
@@ -260,13 +260,13 @@
                             <td>{{ post.created|date:"d.m.Y H:i" }}</td>
                             <td>
                                 {% if post.status_approval == 'not_started' %}
-                                    <span class="status-badge status-not-started">Ожидает начала</span>
+                                    <span class="status-badge status-not-started">Күтүп жатат</span>
                                 {% elif post.status_approval == 'in_progress' %}
-                                    <span class="status-badge status-in-progress">В процессе</span>
+                                    <span class="status-badge status-in-progress">Процессте</span>
                                 {% elif post.status_approval == 'approved' %}
-                                    <span class="status-badge status-approved">✅ Одобрено</span>
+                                    <span class="status-badge status-approved">✅ Макулдашылды</span>
                                 {% elif post.status_approval == 'rejected' %}
-                                    <span class="status-badge status-rejected">❌ Отклонено</span>
+                                    <span class="status-badge status-rejected">❌ Четке кагылды</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -276,17 +276,17 @@
         {% else %}
             <div class="empty-state">
                 <i class="fas fa-check-circle"></i>
-                <p>Нет постов, ожидающих вашего согласования</p>
+                <p>Өтүнмөлөр табылган жок</p>
             </div>
         {% endif %}
 
-        <h2 class="section-title"><i class="fas fa-check-circle"></i> Согласованные посты</h2>
+        <h2 class="section-title"><i class="fas fa-check-circle"></i> Макулдашылган өтүнмөлө</h2>
         {% if approved_posts %}
             <table class="post-table">
                 <thead>
                     <tr>
                         <th>№</th>
-                        <th>Заголовок</th>
+                        <th>аталышы</th>
                         <th>Автор</th>
                         <th>Дата</th>
                         <th>Статус</th>
@@ -300,7 +300,7 @@
                             <td>{{ post.owner.get_full_name|default:post.owner.email }}</td>
                             <td>{{ post.created|date:"d.m.Y H:i" }}</td>
                             <td>
-                                <span class="status-badge status-approved">✅ Одобрено</span>
+                                <span class="status-badge status-approved">✅ бекитилди</span>
                             </td>
                         </tr>
                     {% endfor %}
@@ -309,17 +309,17 @@
         {% else %}
             <div class="empty-state">
                 <i class="fas fa-check-circle"></i>
-                <p>Вы еще не согласовали ни одного поста</p>
+                <p>табылган жок</p>
             </div>
         {% endif %}
 
     {% else %}
         <div class="empty-state" style="max-width: 600px; margin: 2rem auto;">
             <i class="fas fa-lock" style="font-size: 3rem;"></i>
-            <h3 style="color: #2d3748; margin: 1rem 0;">Доступ ограничен</h3>
-            <p style="margin-bottom: 1.5rem;">Для просмотра и создания постов необходимо войти в систему</p>
+            <h3 style="color: #2d3748; margin: 1rem 0;">Мүмкүнчүлүк чектелген</h3>
+            <p style="margin-bottom: 1.5rem;">Системаны колдонуу үчүн сиз регистрация болушуңуз керек, эгерде регистрациядан өтсөңүз логин пароль менен кириңиз </p>
             <a href="{% url 'login' %}" class="btn-action" style="margin: 0 auto;">
-                <i class="fas fa-sign-in-alt"></i> Войти
+                <i class="fas fa-sign-in-alt"></i> Кирүү
             </a>
         </div>
     {% endif %}

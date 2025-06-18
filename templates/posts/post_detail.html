@@ -226,45 +226,109 @@
         background: #e2e8f0;
         margin: 2rem 0;
     }
+
+    /* Стили для сравнения кредитов */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th, .table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .table tbody tr:not(:last-child) {
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        border-radius: 50rem;
+    }
+
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .credit-comparison-card {
+        border: none;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+    .credit-comparison-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .credit-summary {
+        margin-bottom: 1.5rem;
+    }
+
+    .credit-summary .alert {
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
 </style>
 
 <div class="post-container">
     <div class="post-header">
-        <h1 class="post-title">{{ post.title|default:"Без названия" }}</h1>
+        <h1 class="post-title">{{ post.title|default:"Аты жок" }}</h1>
         <div class="post-meta">
             <span><i class="fas fa-user"></i> Автор: 
                 {% if post.owner.get_full_name %}
                     {{ post.owner.get_full_name }}
                 {% else %}
-                    {{ post.owner.email|default:"Неизвестный автор" }}
+                    {{ post.owner.email|default:"Белгисиз автор" }}
                 {% endif %}
             </span>
-            <span><i class="fas fa-calendar"></i> Создано: {{ post.created|date:"d.m.Y H:i" }}</span>
+            <span><i class="fas fa-calendar"></i> Түзүлдү: {{ post.created|date:"d.m.Y H:i" }}</span>
         </div>
         
         <div class="post-meta">
             <span>
                 <i class="fas fa-tag"></i> Статус: 
                 <span class="status-badge {% if post.status == 'draft' %}status-draft{% else %}status-published{% endif %}">
-                    {% if post.status == 'draft' %}Черновик{% else %}Опубликован{% endif %}
+                    {% if post.status == 'draft' %}Черновик{% else %}Жарыясы{% endif %}
                 </span>
             </span>
             <span>
-                <i class="fas fa-check-circle"></i> Согласование: 
+                <i class="fas fa-check-circle"></i> Макулдашуу: 
                 <span class="status-badge 
                     {% if post.status_approval == 'not_started' %}status-not-started
                     {% elif post.status_approval == 'in_progress' %}status-in-progress
                     {% elif post.status_approval == 'approved' %}status-approved
                     {% elif post.status_approval == 'rejected' %}status-rejected{% endif %}">
-                    {% if post.status_approval == 'not_started' %}Ожидает начала
-                    {% elif post.status_approval == 'in_progress' %}В процессе
-                    {% elif post.status_approval == 'approved' %}Одобрено
-                    {% elif post.status_approval == 'rejected' %}Отклонено{% endif %}
+                    {% if post.status_approval == 'not_started' %}Күтүүдө
+                    {% elif post.status_approval == 'in_progress' %}Процессте
+                    {% elif post.status_approval == 'approved' %}Макулдашылды
+                    {% elif post.status_approval == 'rejected' %}Четке кагылды{% endif %}
                 </span>
             </span>
             {% if post.current_approver %}
                 <span>
-                    <i class="fas fa-user-check"></i> Текущий согласующий: 
+                    <i class="fas fa-user-check"></i> Учурдагы макулдашуучу: 
                     {% if post.current_approver.get_full_name %}
                         {{ post.current_approver.get_full_name }}
                     {% else %}
@@ -272,7 +336,7 @@
                     {% endif %}
                 </span>
             {% else %}
-                <span><i class="fas fa-check-double"></i> Согласование завершено</span>
+                <span><i class="fas fa-check-double"></i> Макулдашуу аяктады</span>
             {% endif %}
         </div>
     </div>
@@ -283,36 +347,103 @@
     
     <div class="divider"></div>
     
-    <h4 class="section-title"><i class="fas fa-file-alt"></i> Документы</h4>
+    <h4 class="section-title"><i class="fas fa-file-alt"></i> Документтер</h4>
     <div class="document-buttons">
         {% if post.pdf_file %}
             <a href="{{ post.pdf_file.url }}" class="btn btn-outline" target="_blank">
-                <i class="fas fa-file-pdf"></i> Скачать заявление
+                <i class="fas fa-file-pdf"></i>Арызды көчүрүү
             </a>
         {% endif %}
         
         <a href="/media/protocols/post_{{ post.id }}_protocol.pdf" class="btn btn-outline" target="_blank">
-            <i class="fas fa-file-contract"></i> Скачать протокол
+            <i class="fas fa-file-contract"></i>Протоколду көчүрүү
         </a>
     </div>
     
     <div class="divider"></div>
     
-    <h4 class="section-title"><i class="fas fa-list-ul"></i> Предметы и кредиты</h4>
+    <h4 class="section-title"><i class="fas fa-list-ul"></i> Предметтер жана кредиттер</h4>
     <ul class="subjects-list">
         {% for post_subject in post.post_subjects.all %}
             <li class="subject-item">
                 <span>{{ post_subject.subject.name }}</span>
-                <span>{{ post_subject.credits }} кредитов</span>
+                <span>{{ post_subject.credits }} кредит</span>
             </li>
         {% empty %}
-            <li>Нет предметов для этого поста.</li>
+            <li>Бул билдирүү үчүн эч нерсе жок.</li>
         {% endfor %}
     </ul>
+
+    {% if credit_transfer %}
+    <div class="divider"></div>
+
+    <h4 class="section-title"><i class="fas fa-exchange-alt"></i> Которуу кредиттерин салыштыруу</h4>
+
+    <div class="card credit-comparison-card">
+        <div class="card-body">
+            <div class="credit-summary">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle"></i>Жүктөө</h5>
+                            <p class="display-4">{{ credit_transfer.total_transferred }}</p>
+                            <p>{{ credit_transfer.transfer_percentage }}%</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-file-alt"></i> Баштапкы</h5>
+                            <p class="display-4">{{ credit_transfer.total_original }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Айырма</h5>
+                            <p class="display-4">{{ credit_transfer.total_lost }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead style="background: #2d3748; color: white;">
+                        <tr>
+                            <th>Предмет</th>
+                            <th class="text-center">Исходные</th>
+                            <th class="text-center">Перезачтено</th>
+                            <th class="text-center">Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in credit_transfer.results %}
+                        <tr style=  "{% if item.status == 'transferred' %}background-color: #f0fff4;{% else %}background-color: #fffaf0;{% endif %}">
+                            <td>{{ item.subject }}</td>
+                            <td class="text-center">{{ item.original_credits }}</td>
+                            <td class="text-center">{{ item.transferred_credits }}</td>
+                            <td class="text-center">
+                                {% if item.status == 'transferred' %}
+                                <span class="badge" style="background: #38a169; color: white;">Перезачтено</span>
+                                {% else %}
+                                <span class="badge" style="background: #dd6b20; color: white;">Не перезачтено</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3 text-muted" style="font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> Учебный план: {{ credit_transfer.target_curriculum }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <div class="divider"></div>
     
-    <h4 class="section-title"><i class="fas fa-project-diagram"></i> Маршрут согласования</h4>
+    <h4 class="section-title"><i class="fas fa-project-diagram"></i> Макулдашуу маршруту</h4>
     <ul class="approval-steps">
         {% for step in approval_steps %}
             <li class="approval-step">
@@ -344,16 +475,16 @@
     
     {% if can_approve %}
         <div class="approval-form">
-            <h5><i class="fas fa-check-circle"></i> Ваше решение по согласованию</h5>
+            <h5><i class="fas fa-check-circle"></i> Макулдашуу боюнча сиздин чечим</h5>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="approval">
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                     <button type="submit" name="approve" class="btn btn-success">
-                        <i class="fas fa-check"></i> Согласовать
+                        <i class="fas fa-check"></i> Макулдашуу
                     </button>
                     <button type="submit" name="reject" class="btn btn-danger">
-                        <i class="fas fa-times"></i> Отклонить
+                        <i class="fas fa-times"></i> Четке кагуу
                     </button>
                 </div>
             </form>
@@ -362,7 +493,7 @@
     
     <div class="divider"></div>
     
-    <h4 class="section-title"><i class="fas fa-comments"></i> Комментарии</h4>
+    <h4 class="section-title"><i class="fas fa-comments"></i> Комментарийлер</h4>
     <ul class="comments-list">
         {% for comment in comments %}
             <li class="comment-item">
@@ -377,7 +508,7 @@
                 <p>{{ comment.text }}</p>
             </li>
         {% empty %}
-            <li>Комментариев пока нет.</li>
+            <li>Комментарийлер табылган жок</li>
         {% endfor %}
     </ul>
     
@@ -392,19 +523,19 @@
             </button>
         </form>
     {% else %}
-        <p>Вы должны быть авторизованы, чтобы оставить комментарий.</p>
+        <p>Комментарий калтыруу үчүн сиз киришиңиз керек.</p>
     {% endif %}
     
     {% if user.is_superuser %}
         <div class="divider"></div>
         <div style="display: flex; gap: 1rem;">
             <a href="{% url 'post-update' post.id %}" class="btn btn-secondary">
-                <i class="fas fa-edit"></i> Редактировать
+                <i class="fas fa-edit"></i> Өзгөртүү
             </a>
             <form action="{% url 'post-delete' post.id %}" method="post" style="margin: 0;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот пост?')">
-                    <i class="fas fa-trash"></i> Удалить пост
+                    <i class="fas fa-trash"></i> Постту жок кылуу
                 </button>
             </form>
         </div>
@@ -424,4 +555,4 @@
         });
     });
 </script>
-{% endblock %}
+{% endblock %} 

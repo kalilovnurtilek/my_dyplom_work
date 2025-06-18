@@ -1,326 +1,407 @@
 {% extends "base.html" %}
-{% load widget_tweaks %}
+{% load widget_tweaks static %}
 
 {% block content %}
-<style>
-    .form-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-    
-    .form-header {
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: #2d3748;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background-color: #f8fafc;
-    }
-    
-    .form-control:focus {
-        border-color: #667eea;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-        background-color: white;
-    }
-    
-    .form-textarea {
-        min-height: 150px;
-        resize: vertical;
-    }
-    
-    .section-title {
-        font-size: 1.25rem;
-        margin: 2rem 0 1rem;
-        color: #2d3748;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .dynamic-container {
-        margin-top: 1rem;
-    }
-    
-    .dynamic-item {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        align-items: center;
-    }
-    
-    .dynamic-item select,
-    .dynamic-item input {
-        flex: 1;
-    }
-    
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
-    }
-    
-    .btn-secondary {
-        background: #e2e8f0;
-        color: #4a5568;
-    }
-    
-    .btn-secondary:hover {
-        background: #cbd5e0;
-    }
-    
-    .btn-danger {
-        background: #fed7d7;
-        color: #9b2c2c;
-    }
-    
-    .btn-danger:hover {
-        background: #feb2b2;
-    }
-    
-    .btn-warning {
-        background: #feebc8;
-        color: #9c4221;
-    }
-    
-    .btn-warning:hover {
-        background: #fbd38d;
-    }
-    
-    .btn-icon {
-        padding: 0.5rem;
-        min-width: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .error-message {
-        color: #e53e3e;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-    
-    .file-input {
-        display: none;
-    }
-    
-    .file-label {
-        display: inline-block;
-        padding: 0.75rem 1.5rem;
-        background: #e2e8f0;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .file-label:hover {
-        background: #cbd5e0;
-    }
-    
-    .file-name {
-        margin-left: 1rem;
-        color: #4a5568;
-    }
-</style>
-
-<div class="form-container">
-    <div class="form-header">
-        <h2>Создание новой записи</h2>
-        <p>Заполните все необходимые поля для создания новой записи</p>
-    </div>
-
-    <form method="post" enctype="multipart/form-data">
+<div class="container py-4">
+    <h2 class="mb-4">Жаңы өтүнмөлөрдү түзүү</h2>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
 
-        <div class="form-group">
-            <label for="{{ form.title.id_for_label }}" class="form-label">Заголовок</label>
-            {% render_field form.title class="form-control" %}
-            {% if form.title.errors %}
-                <div class="error-message">{{ form.title.errors }}</div>
-            {% endif %}
+        {{ form.non_field_errors }}
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light text-dark d-flex align-items-center py-3">
+                <i class="bi bi-file-earmark-text fs-4 me-2"></i>
+                <h5 class="mb-0">Негизги маалымат</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Аты-жөнү</label>
+                    {{ form.title|add_class:"form-control"|attr:"required" }}
+                    <div class="invalid-feedback">
+                        Студенттин аты жөнүн жазыңыз
+                    </div>
+                    {{ form.title.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.content.id_for_label }}" class="form-label">Себеп</label>
+                    {{ form.content|add_class:"form-control"|attr:"rows:5"|attr:"required" }}
+                    <div class="invalid-feedback">
+                        Себебин жазыңыз
+                    </div>
+                    {{ form.content.errors }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">Статус</label>
+                        {{ form.status|add_class:"form-select" }}
+                        {{ form.status.errors }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.specialty.id_for_label }}" class="form-label">Адистик</label>
+                        {# Убедитесь, что id этого select будет 'id_specialty' если имя поля в форме 'specialty' #}
+                        {{ form.specialty|add_class:"form-select"|attr:"required"|attr:"id:id_specialty" }}
+                        <div class="invalid-feedback">
+                            Адистик тандаңыз
+                        </div>
+                        {{ form.specialty.errors }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.pdf_file.id_for_label }}" class="form-label">Студенттин транскрипти</label>
+                    {{ form.pdf_file|add_class:"form-control"|attr:"accept:.pdf" }}
+                    <div class="form-text">Файлдын максималдуу көлөмү: 10 МБ. Адистикти тандоодо ал боюнча окуу программасы төмөндө көрсөтүлөт. Салыштыруу үчүн транскриптиңизди жүктөп алсаңыз болот.</div>
+                    {{ form.pdf_file.errors }}
+                    <div id="pdf-preview" class="mt-3 rounded border p-2" style="display: none;">
+                        <h6 class="text-muted mb-2">Алдын-ала көрүү PDF:</h6>
+                        <iframe id="pdf-viewer" width="100%" height="500px" style="border: none;"></iframe>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="{{ form.content.id_for_label }}" class="form-label">Содержимое</label>
-            {% render_field form.content class="form-control form-textarea" %}
-        </div>
-
-        <div class="form-group">
-            <label for="{{ form.status.id_for_label }}" class="form-label">Статус</label>
-            {% render_field form.status class="form-control" %}
-        </div>
-
-        <div class="form-group">
-            <label for="{{ form.pdf_file.id_for_label }}" class="form-label">Заявление студента (PDF/скан)</label>
-            <label for="id_pdf_file" class="file-label">
-                <i class="fas fa-file-pdf"></i> Выберите файл
-            </label>
-            <span id="file-name" class="file-name">Файл не выбран</span>
-            {% render_field form.pdf_file class="file-input" %}
-            {% if form.pdf_file.errors %}
-                <div class="error-message">{{ form.pdf_file.errors }}</div>
-            {% endif %}
-        </div>
-
-        <div class="form-group">
-            <label for="{{ form.specialty.id_for_label }}" class="form-label">Приоритетная специальность</label>
-            {% render_field form.specialty class="form-control" %}
-            {% if form.specialty.errors %}
-                <div class="error-message">{{ form.specialty.errors }}</div>
-            {% endif %}
-        </div>
-
-        <h4 class="section-title">Предметы и кредиты</h4>
-        <div id="subject-credits" class="dynamic-container">
-            <div class="dynamic-item">
-                <select name="subjects[]" class="form-control">
-                    <option value="">Выберите предмет</option>
-                    {% for subject in subjects %}
-                        <option value="{{ subject.id }}">{{ subject.name }}</option>
-                    {% endfor %}
-                </select>
-                <input type="number" name="credits[]" class="form-control" placeholder="Кредиты" step="0.5" min="0">
-                <button type="button" class="btn btn-danger btn-icon" onclick="removeItem(this)">
-                    <i class="fas fa-trash"></i>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light text-dark d-flex align-items-center py-3">
+                <i class="bi bi-list-ol fs-4 me-2"></i>
+                <h5 class="mb-0">Предметтер жана кредиттер</h5>
+            </div>
+            <div class="card-body p-4">
+                <div id="subject-credits-container">
+                    <div class="subject-credit row g-3 mb-3 align-items-center">
+                        <div class="col-md-7">
+                            <label class="form-label visually-hidden">Предмет</label>
+                            <select name="subjects[]" class="form-select" required>
+                                <option value="" selected disabled>Предмет тандаңыз</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Предмет тандаңыз</div>
+                        </div>
+                        <div class="col-md-3">
+                             <label class="form-label visually-hidden">Кредиттер</label>
+                            <input type="number" name="credits[]" class="form-control" placeholder="Кредиты" step="0.5" min="0" required>
+                            <div class="invalid-feedback">Кредитти көрсөтүңүз</div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeSubjectCredit(this)" title="Удалить предмет">
+                                <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Өчүрүү</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary mt-2" onclick="addSubjectCredit()">
+                    <i class="bi bi-plus-circle"></i> Предмет кошуу
                 </button>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary" onclick="addSubjectCredit()">
-            <i class="fas fa-plus"></i> Добавить предмет
-        </button>
 
-        <h4 class="section-title">Маршрут согласования</h4>
-        <div id="approval-steps" class="dynamic-container">
-            <div class="dynamic-item">
-                <select name="approvers[]" class="form-control">
-                    <option value="">Выберите пользователя</option>
-                    {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
-                    {% endfor %}
-                </select>
-                <button type="button" class="btn btn-danger btn-icon" onclick="removeItem(this)">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button type="button" class="btn btn-warning btn-icon" onclick="moveUp(this)">
-                    <i class="fas fa-arrow-up"></i>
-                </button>
-                <button type="button" class="btn btn-warning btn-icon" onclick="moveDown(this)">
-                    <i class="fas fa-arrow-down"></i>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light text-dark d-flex align-items-center py-3">
+                <i class="bi bi-diagram-3 fs-4 me-2"></i>
+                <h5 class="mb-0">Макулдашуу маршруту</h5>
+            </div>
+            <div class="card-body p-4">
+                <div id="approval-steps-container">
+                    <div class="approval-step row g-3 mb-3 align-items-center">
+                        <div class="col-md-7 col-lg-8">
+                             <label class="form-label visually-hidden">Макулдашуучу</label>
+                            <select name="approvers[]" class="form-select" required>
+                                <option value="" selected disabled>Макулдашууну тандаңыз</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.get_full_name|default:user.email }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Сураныч, макулдашуучуну тандаңыз</div>
+                        </div>
+                        <div class="col-md-5 col-lg-4 d-flex gap-2">
+                            <button type="button" class="btn btn-outline-danger" onclick="removeApprover(this)" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="moveUp(this)" title="Поднять выше">
+                                <i class="bi bi-arrow-up"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="moveDown(this)" title="Опустить ниже">
+                                <i class="bi bi-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary mt-2" onclick="addApprovalStep()">
+                    <i class="bi bi-plus-circle"></i> Этап кошуу
                 </button>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary" onclick="addApprovalStep()">
-            <i class="fas fa-plus"></i> Добавить этап
-        </button>
 
-        <div class="form-group" style="margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Создать запись
-            </button>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5 pt-3 border-top">
+            <a href="{% url 'index-page' %}" class="btn btn-secondary me-md-2">Жок кылуу</a>
+            <button type="submit" class="btn btn-success">Өтүнмө түзүү</button>
         </div>
     </form>
 </div>
 
 <script>
-    // Файловый инпут
-    document.getElementById('id_pdf_file').addEventListener('change', function(e) {
-        const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
-        document.getElementById('file-name').textContent = fileName;
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectCreditsContainer = document.getElementById('subject-credits-container');
+    const approvalStepsContainer = document.getElementById('approval-steps-container');
+
+    function createRowFromTemplate(templateSelector, container) {
+        const template = document.querySelector(templateSelector);
+        if (!template) return null;
+        const clone = template.cloneNode(true);
+        clone.classList.remove('d-none');
+        clone.removeAttribute('id');
+        
+        const selects = clone.querySelectorAll('select');
+        selects.forEach(s => s.value = "");
+        
+        const inputs = clone.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="hidden"])');
+        inputs.forEach(i => i.value = "");
+
+        clone.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        clone.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+        
+        container.appendChild(clone);
+        return clone;
+    }
+    
+    
+    if (subjectCreditsContainer.children.length === 0) {
+        
+    }
+ 
+    if (approvalStepsContainer.children.length === 0) {
+        // Similar to subjects, ensure there's a way to create the first row if none exists.
+    }
+    
+    window.addSubjectCredit = function() {
+        const original = subjectCreditsContainer.querySelector('.subject-credit');
+        if (!original) {
+            console.error('Original subject-credit row not found for cloning.');
+            // Potentially call a function here to create the very first row if it's completely dynamic
+            return;
+        }
+        const clone = original.cloneNode(true);
+        clone.querySelector('select').value = "";
+        const creditInput = clone.querySelector('input[type="number"]');
+        if(creditInput) creditInput.value = "";
+        
+        clone.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        clone.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+        
+        subjectCreditsContainer.appendChild(clone);
+    }
+
+    window.removeSubjectCredit = function(button) {
+        const step = button.closest('.subject-credit');
+        const steps = subjectCreditsContainer.querySelectorAll('.subject-credit');
+        if (steps.length > 1) {
+            step.remove();
+        } else {
+            step.querySelector('select').value = "";
+            const creditInput = step.querySelector('input[type="number"]');
+            if(creditInput) creditInput.value = "";
+        }
+    }
+
+    window.addApprovalStep = function() {
+        const original = approvalStepsContainer.querySelector('.approval-step');
+         if (!original) {
+            console.error('Original approval-step row not found for cloning.');
+            return;
+        }
+        const clone = original.cloneNode(true);
+        clone.querySelector('select').value = "";
+
+        clone.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        clone.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+
+        approvalStepsContainer.appendChild(clone);
+    }
+
+    window.removeApprover = function(button) {
+        const step = button.closest('.approval-step');
+        const steps = approvalStepsContainer.querySelectorAll('.approval-step');
+        if (steps.length > 1) {
+             step.remove();
+        } else {
+            step.querySelector('select').value = "";
+        }
+    }
+
+    window.moveUp = function(button) {
+        const step = button.closest('.approval-step');
+        const previous = step.previousElementSibling;
+        if (previous) {
+            step.parentNode.insertBefore(step, previous);
+        }
+    }
+
+    window.moveDown = function(button) {
+        const step = button.closest('.approval-step');
+        const next = step.nextElementSibling;
+        if (next) {
+            next.parentNode.insertBefore(step, next.nextSibling);
+        }
+    }
+
+    const specialtySelect = document.getElementById('id_specialty'); // ID for specialty dropdown
+    const pdfPreview = document.getElementById('pdf-preview');
+    const pdfViewer = document.getElementById('pdf-viewer');
+    const pdfFileInput = document.getElementById('{{ form.pdf_file.id_for_label }}');
+
+    specialtySelect.addEventListener('change', function() {
+        const specialtyId = this.value;
+        let userFileLoaded = pdfFileInput.files && pdfFileInput.files[0] && pdfFileInput.files[0].type === 'application/pdf';
+
+        if (!specialtyId) {
+            // If no specialty is selected, only show user's PDF if it's already loaded and valid
+            if (userFileLoaded) {
+                 const fileURL = URL.createObjectURL(pdfFileInput.files[0]);
+                 pdfViewer.src = fileURL;
+                 pdfPreview.style.display = 'block';
+                 document.getElementById('pdf-preview').querySelector('h6').textContent = 'Предварительный просмотр загруженного транскрипта:';
+            } else {
+                pdfPreview.style.display = 'none';
+            }
+            return;
+        }
+
+        // --- Отображение PDF учебного плана по специальности ---
+        // ВАЖНО: Замените это на реальный API вызов в вашем Django приложении!
+        // Это статический объект для демонстрации. Ключи должны совпадать
+        // со значениями <option value="..."> в вашем select'е специальностей.
+        const specialtyPdfs = {
+            '1': "{% static 'specialties/specialty_1_plan.pdf' %}", // Пример: /static/specialties/specialty_1_plan.pdf
+            '2': "{% static 'specialties/specialty_2_plan.pdf' %}",
+            '3': "{% static 'specialties/specialty_3_plan.pdf' %}"
+            // Добавьте сюда ID ваших специальностей и пути к их PDF файлам
+            // Убедитесь, что эти файлы существуют в вашей папке static/specialties/
+            // или соответствующей папке медиа-файлов, если они загружаются через админку.
+            // Если используете MEDIA_URL, то пути будут типа '/media/specialties/file.pdf'
+        };
+
+        if (specialtyPdfs[specialtyId]) {
+            pdfViewer.src = specialtyPdfs[specialtyId] + '#toolbar=0&navpanes=0'; // Скрываем панель инструментов PDF для учебного плана
+            pdfPreview.style.display = 'block';
+            document.getElementById('pdf-preview').querySelector('h6').textContent = 'Учебный план по специальности:';
+        } else {
+            // Если для выбранной специальности нет PDF, но загружен пользовательский файл, показываем его
+            if (userFileLoaded) {
+                 const fileURL = URL.createObjectURL(pdfFileInput.files[0]);
+                 pdfViewer.src = fileURL;
+                 pdfPreview.style.display = 'block';
+                 document.getElementById('pdf-preview').querySelector('h6').textContent = 'Предварительный просмотр загруженного транскрипта:';
+            } else {
+                pdfPreview.style.display = 'none'; // Иначе скрываем предпросмотр
+            }
+            console.warn(`PDF для специальности с ID ${specialtyId} не найден.`);
+        }
+        // --- Конец блока отображения PDF учебного плана ---
+
+        /*
+        // --- Пример с FETCH (рекомендуемый способ для реального приложения) ---
+        fetch(`/api/get-specialty-pdf/${specialtyId}/`) // Вам нужно будет создать этот URL и view в Django
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok for specialty PDF');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.pdf_url) {
+                    pdfViewer.src = data.pdf_url + '#toolbar=0&navpanes=0';
+                    pdfPreview.style.display = 'block';
+                    document.getElementById('pdf-preview').querySelector('h6').textContent = 'Учебный план по специальности:';
+                } else {
+                    // Если для выбранной специальности нет PDF, но загружен пользовательский файл, показываем его
+                    if (userFileLoaded) {
+                         const fileURL = URL.createObjectURL(pdfFileInput.files[0]);
+                         pdfViewer.src = fileURL;
+                         pdfPreview.style.display = 'block';
+                         document.getElementById('pdf-preview').querySelector('h6').textContent = 'Предварительный просмотр загруженного транскрипта:';
+                    } else {
+                        pdfPreview.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching specialty PDF:', error);
+                // Если ошибка при загрузке PDF специальности, но загружен пользовательский файл, показываем его
+                if (userFileLoaded) {
+                     const fileURL = URL.createObjectURL(pdfFileInput.files[0]);
+                     pdfViewer.src = fileURL;
+                     pdfPreview.style.display = 'block';
+                     document.getElementById('pdf-preview').querySelector('h6').textContent = 'Предварительный просмотр загруженного транскрипта:';
+                } else {
+                    pdfPreview.style.display = 'none';
+                }
+            });
+        // --- Конец примера с FETCH ---
+        */
     });
 
-    // Динамическое добавление предметов
-    function addSubjectCredit() {
-        const container = document.getElementById('subject-credits');
-        const newItem = container.querySelector('.dynamic-item').cloneNode(true);
-        newItem.querySelector('select').value = "";
-        newItem.querySelector('input').value = "";
-        container.appendChild(newItem);
-    }
-
-    // Динамическое добавление этапов согласования
-    function addApprovalStep() {
-        const container = document.getElementById('approval-steps');
-        const newItem = container.querySelector('.dynamic-item').cloneNode(true);
-        newItem.querySelector('select').value = "";
-        container.appendChild(newItem);
-    }
-
-    // Удаление элемента
-    function removeItem(button) {
-        const item = button.closest('.dynamic-item');
-        // Не удаляем последний элемент
-        if (item.parentElement.children.length > 1) {
-            item.remove();
-        }
-    }
-
-    // Перемещение вверх
-    function moveUp(button) {
-        const item = button.closest('.dynamic-item');
-        const prevItem = item.previousElementSibling;
-        if (prevItem) {
-            item.parentNode.insertBefore(item, prevItem);
-        }
-    }
-
-    // Перемещение вниз
-    function moveDown(button) {
-        const item = button.closest('.dynamic-item');
-        const nextItem = item.nextElementSibling;
-        if (nextItem) {
-            item.parentNode.insertBefore(nextItem, item);
-        }
-    }
-
-    // Инициализация - скрываем кнопки удаления/перемещения для первого элемента
-    document.addEventListener('DOMContentLoaded', function() {
-        const firstSubjectItem = document.querySelector('#subject-credits .dynamic-item');
-        const firstApprovalItem = document.querySelector('#approval-steps .dynamic-item');
-        
-        if (firstSubjectItem) {
-            firstSubjectItem.querySelector('.btn-danger').style.visibility = 'hidden';
-        }
-        
-        if (firstApprovalItem) {
-            firstApprovalItem.querySelector('.btn-danger').style.visibility = 'hidden';
-            firstApprovalItem.querySelector('.btn-warning:nth-of-type(1)').style.visibility = 'hidden';
+    pdfFileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            if (file.type === 'application/pdf') {
+                const fileURL = URL.createObjectURL(file);
+                pdfViewer.src = fileURL; // Показываем PDF пользователя с панелью инструментов
+                pdfPreview.style.display = 'block';
+                document.getElementById('pdf-preview').querySelector('h6').textContent = 'Предварительный просмотр загруженного транскрипта:';
+            } else {
+                alert('Пожалуйста, выберите файл в формате PDF.');
+                this.value = ''; // Очищаем инпут
+                // Если после очистки инпута выбрана специальность, пытаемся показать её PDF
+                if (specialtySelect.value) {
+                    specialtySelect.dispatchEvent(new Event('change'));
+                } else {
+                    pdfPreview.style.display = 'none';
+                }
+            }
+        } else { // Файл не выбран или очищен
+            // Если файл очищен, но выбрана специальность, показать её PDF
+            if (specialtySelect.value) {
+                specialtySelect.dispatchEvent(new Event('change'));
+            } else {
+                pdfPreview.style.display = 'none';
+            }
         }
     });
+
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+});
 </script>
+
+<style>
+/* Optional: Custom styles if Bootstrap utilities are not enough */
+.card-header i {
+    vertical-align: middle;
+}
+.form-label.visually-hidden { /* For accessibility of dynamic row inputs */
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+</style>
 {% endblock %}

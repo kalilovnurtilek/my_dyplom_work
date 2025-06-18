@@ -1,5 +1,5 @@
 from django.contrib import admin
-from posts.models import Post , Specialty, Subject, PostSubject
+from posts.models import Post , Specialty, Subject, PostSubject, Curriculum, CurriculumSubject
 
 # простой способ регистрации модели в админке
 # admin.site.register(Post)
@@ -30,14 +30,13 @@ class PostAdmin(admin.ModelAdmin):
         return 'No file'
     get_pdf_link.short_description = 'PDF File'
     get_pdf_link.allow_tags = True  # Это важно, чтобы HTML-ссылка рендерилась
-# @admin.register(PDFPost)
-# class PdfPostAdmin(admin.ModelAdmin):
-#     list_display = ['title','owner','pdf_file']
-#     list_filter= ['owner',]
-#     list_editable = ['owner',]
 
-# @admin.register(Post)
-# class CommentAdmin(admin.ModelAdmin):
-#     list_display = ('text', 'author', 'created', 'post')  # Пример с корректными полями
 
-# admin.site.register(Comment, CommentAdmin)
+class CurriculumSubjectInline(admin.TabularInline):
+    model = CurriculumSubject
+    extra = 1
+
+@admin.register(Curriculum)
+class CurriculumAdmin(admin.ModelAdmin):
+    list_display = ('specialty', 'year', 'is_active')
+    inlines = [CurriculumSubjectInline]
